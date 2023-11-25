@@ -56,17 +56,13 @@ export default class Builder {
         this._scene.add(ambientLight);
     }
 
-    // async addHeightmap() {
-    //     this._heightMap = await fromImage({ imgUrl: './iceland_heightmap.png' });
-    //     return Promise.resolve();
-    // }
-
     async addScene() {
         const heightMap = await fromImage({
             imgUrl: './iceland_heightmap.png',
         });
-
+        
         const plane = makePlane(100, 500);
+        plane.name = 'terrain';
         plane.scale.add(new THREE.Vector3(10, 10, 10));
 
         heightMap.updatePlane(plane.geometry, 100, { strenth: 7 });
@@ -74,16 +70,8 @@ export default class Builder {
         const cube = makeCube(2);
         cube.name = 'cube';
 
-        const heigthTracer = new THREE.Raycaster(
-            new THREE.Vector3(0, 500, 0), THREE.Scene.DEFAULT_UP.negate()); 
-
         this._controller = new Controller(this._scene, {
-            setHeight: (vec) => {
-                heigthTracer.set(new THREE.Vector3(vec.x, 500, vec.z), 
-                    THREE.Scene.DEFAULT_UP);
-                const intersection = heigthTracer.intersectObject(plane);
-                return intersection.length && intersection[0].point.y + 1;
-            }
+            terrain: plane
         });
 
         this._next.push((t) => this._controller.step(t));
@@ -101,6 +89,7 @@ export default class Builder {
                     this._controller.move(obj, vec);
                 },
                 activeObjectName: 'cube',
+                excludeSelecting: ['terrain']
             }
         );
 

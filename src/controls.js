@@ -19,8 +19,10 @@ export default class Controls {
     }
 
     step(t) {
-        if(!this._activeObject) {
-            this._activeObject = this._scene.getObjectByName(this._options.activeObjectName);
+        if (!this._activeObject) {
+            this._activeObject = this._scene.getObjectByName(
+                this._options.activeObjectName
+            );
         }
 
         if (this._activeObject) {
@@ -32,7 +34,6 @@ export default class Controls {
         const currentPosition = this._activeObject.position;
 
         if (!currentPosition.equals(this._previousPosition)) {
-
             const { x, y, z } = currentPosition;
             this._orbitControls.target.set(x, y, z);
             this._orbitControls.update();
@@ -56,11 +57,18 @@ export default class Controls {
 
             this._rayCaster.setFromCamera(pointer, this._camera);
 
-            const intersects = this._rayCaster.intersectObjects(
-                this._scene.children
-            );
+            const intersects = this._rayCaster
+                .intersectObjects(this._scene.children)
+                .filter(
+                    (i) =>
+                        !this._options.excludeSelecting.some(
+                            (e) => i.object.name === e
+                        )
+                );
 
-            if (intersects && intersects.length) {
+            // if (intersects && intersects.length) {
+            // if(!this._options.excludeSelecting.some(e => intersects.object.name === e)) {
+            if (intersects.length) {
                 this._activeObject = intersects[0].object;
             }
         });
