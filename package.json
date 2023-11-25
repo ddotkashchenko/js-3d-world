@@ -1,0 +1,19 @@
+{
+  "name": "3djs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "npx vite",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "three": "^0.158.0",
+    "three-addons": "^1.2.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
