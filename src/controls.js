@@ -77,16 +77,16 @@ export default class Controls {
             const vec = new THREE.Vector3();
             switch (e.key) {
                 case 'w':
-                    vec.add(new THREE.Vector3(-1, 0, 0));
+                    vec.add(new THREE.Vector3(0, 0, -1));
                     break;
                 case 's':
-                    vec.add(new THREE.Vector3(1, 0, 0));
-                    break;
-                case 'a':
                     vec.add(new THREE.Vector3(0, 0, 1));
                     break;
+                case 'a':
+                    vec.add(new THREE.Vector3(1, 0, 0));
+                    break;
                 case 'd':
-                    vec.add(new THREE.Vector3(0, 0, -1));
+                    vec.add(new THREE.Vector3(-1, 0, 0));
                     break;
             }
             this._options.move && this._options.move(this._activeObject, vec);
