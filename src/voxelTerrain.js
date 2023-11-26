@@ -39,27 +39,30 @@ export default class VoxelTerrain {
         ].map((v, i) => {
           const pos = i % 3;
 
-          if(pos == 2) return v * size + offset.x; // x
-          if(pos == 1) return v * size + offset.y; // y
-          if(pos == 0) return v * size + offset.z; // z
+          if(pos == 2) return v * size + offset.x;
+          if(pos == 1) return v * size + offset.y;
+          if(pos == 0) return v * size + offset.z;
         });
     }
 
     view() {
+        const vertices = new Float32Array([
+            ...this._cube(),
+            ...this._cube(1, new Vector3(0, 0, 2)),
+            ...this._cube(1, new Vector3(2, 0, 0)),
+            ...this._cube(1, new Vector3(2, 0, 2))
+        ]);
+        
         const geometry = new BufferGeometry();
-
-        const c1 = this._cube();
-        const c2 = this._cube(1, new Vector3(5, 2, 0));
-
         geometry.setAttribute(
             'position',
-            new BufferAttribute(new Float32Array([...c1, ...c2]), 3)
+            new BufferAttribute(vertices, 3)
         );
         geometry.computeVertexNormals();
 
         const mesh = new Mesh(
             geometry,
-            new MeshStandardMaterial({ color: 0xffffff })
+            new MeshStandardMaterial({ color: 0xffffff, wireframe: false })
         );
 
         mesh.position.set(0, 50, 0);
