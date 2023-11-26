@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import World from './world';
 import Controller from './controller';
 import Controls from './controls';
+import VoxelTerrain from './voxelTerrain';
 import { fromImage } from './heightmap';
 import { makeCube, makePlane } from './scene';
 
@@ -60,7 +61,7 @@ export default class Builder {
         const heightMap = await fromImage({
             imgUrl: './iceland_heightmap.png',
         });
-        
+
         const plane = makePlane(100, 500);
         plane.name = 'terrain';
         plane.scale.add(new THREE.Vector3(10, 10, 10));
@@ -70,13 +71,17 @@ export default class Builder {
         const cube = makeCube(2);
         cube.name = 'cube';
 
+        const terrain = new VoxelTerrain(1000);
+
+        this._scene.add(terrain.view());
+
         this._controller = new Controller(this._scene, {
-            terrain: plane
+            terrain: plane,
         });
 
         this._next.push((t) => this._controller.step(t));
 
-        this._scene.add(plane, cube)
+        this._scene.add(plane, cube);
     }
 
     addControls() {
@@ -89,7 +94,7 @@ export default class Builder {
                     this._controller.move(obj, vec);
                 },
                 activeObjectName: 'cube',
-                excludeSelecting: ['terrain']
+                excludeSelecting: ['terrain'],
             }
         );
 
@@ -108,4 +113,6 @@ export default class Builder {
 
         return world;
     }
+
+    
 }
