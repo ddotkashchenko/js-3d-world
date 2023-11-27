@@ -16,40 +16,72 @@ export default class VoxelTerrain {
         this._cells = [];
     }
 
-    _construct() {
+    _construct(cells) {
+        const wall = (offset = 0) => [
+            -1, -1, offset,      // 0
+            1, -1, offset,       // 1
+            1, 1, offset,        // 2
+            -1, 1, offset,       // 3
+        ];
+
+        const front = (offset = 0) => [
+            offset, offset + 1, offset + 2, offset, offset + 2, offset + 3
+        ];
+        const top = (offset = 0) => [
+            offset + 6, offset + 3, offset + 2, offset + 6, offset + 7, offset + 3
+        ];
+        const bottom = (offset = 0) => [
+            offset, offset + 4, offset + 1, offset + 5, offset + 1, offset + 4
+        ];
+        const left = (offset = 0) => [
+            offset + 0, offset + 3, offset + 4, offset + 3, offset + 7, offset + 4
+        ];
+        const right = (offset = 0) => [
+            offset + 1, offset + 5, offset + 2, offset + 5, offset + 6, offset + 2
+        ];
+        const back = (offset = 0) => [
+            offset + 6, offset + 5, offset + 4, offset + 7, offset + 6, offset + 4
+        ];
+
         // prettier-ignore
         const vertices = [
-            -1, -1, 1,      // 0
-            1, -1, 1,       // 1
-            1, 1, 1,        // 2
-            -1, 1, 1,       // 3
+            ...wall(),
+            ...wall(-2),
+            ...wall(-4),
+            ...wall(-6),
 
-            -1, -1, -1,     // 4
-            1, -1, -1,      // 5
-            1, 1, -1,       // 6
-            -1, 1, -1,      // 7
-
-            -1, -1, -3,     // 8
-            1, -1, -3,      // 9
-            1, 1, -3,       // 10
-            -1, 1, -3,      // 11
+            ...wall(-8),
+            ...wall(-10),
         ];
 
         // prettier-ignore
         const indices = [
-            0, 1, 2, 0, 2, 3,   // front
+            ...front(),
 
-            0, 4, 1, 5, 1, 4,   // bottom
-            6, 3, 2, 6, 7, 3,   // top
-            0, 3, 4, 3, 7, 4,   // left
-            1, 5, 2, 5, 6, 2,   // right
+            ...bottom(),
+            ...top(), 
+            ...left(), 
+            ...right(), 
 
-            4, 8, 5, 9, 5, 8,   // bottom
-            10, 7, 6, 10, 11, 7,   // top
-            4, 7, 8, 7, 11, 8,   // left
-            5, 9, 6, 9, 10, 6,   // right
+            ...bottom(4), 
+            ...top(4), 
+            ...left(4), 
+            ...right(4),
 
-            10, 9, 8, 11, 10, 8 // back
+            ...bottom(8), 
+            ...top(8), 
+            ...left(8), 
+            ...right(8), 
+
+            ...back(8),
+
+            ...front(16),
+            ...bottom(16), 
+            ...top(16), 
+            ...left(16), 
+            ...right(16),
+
+            ...back(16)
         ];
 
         return {
@@ -74,7 +106,7 @@ export default class VoxelTerrain {
             new MeshPhongMaterial({
                 color: 0xaaaaff,
                 flatShading: true,
-                wireframe: true,
+                wireframe: false,
             })
         );
         mesh.name = 'terrain';
