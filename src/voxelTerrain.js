@@ -28,55 +28,37 @@ export default class VoxelTerrain {
         };
 
         // prettier-ignore
-        const front = (offset) => {
-            const vAt = vertexAt(offset);
-            return [
-                vAt(-1, -1, 1), vAt(1, -1, 1), vAt(1, 1, 1),
-                vAt(-1, -1, 1), vAt(1, 1, 1), vAt(-1, 1, 1)
-            ]
-        };
+        const front = (vAt = vertexAt()) => [
+            vAt(-1, -1, 1), vAt(1, -1, 1), vAt(1, 1, 1),
+            vAt(-1, -1, 1), vAt(1, 1, 1), vAt(-1, 1, 1)
+        ];
         // prettier-ignore
-        const top = (offset) => {
-            const vAt = vertexAt(offset);
-            return [
-                vAt(1, 1, 1), vAt(1, 1, -1), vAt(-1, 1, -1),
-                vAt(-1, 1, 1), vAt(1, 1, 1), vAt(-1, 1, -1)
-            ];
-        };
+        const top = (vAt = vertexAt()) => [
+            vAt(1, 1, 1), vAt(1, 1, -1), vAt(-1, 1, -1),
+            vAt(-1, 1, 1), vAt(1, 1, 1), vAt(-1, 1, -1)
+        ];
         // prettier-ignore
-        const bottom = (offset) => {
-            const vAt = vertexAt(offset);
-            return [
-                vAt(1, -1, -1), vAt(1, -1, 1), vAt(-1, -1, 1), 
-                vAt(-1, -1, -1), vAt(1, -1, -1), vAt(-1, -1, 1), 
-            ];
-        };
+        const bottom = (vAt = vertexAt()) => [
+            vAt(1, -1, -1), vAt(1, -1, 1), vAt(-1, -1, 1), 
+            vAt(-1, -1, -1), vAt(1, -1, -1), vAt(-1, -1, 1), 
+        ];
         // prettier-ignore
-        const left = (offset) => {
-            const vAt = vertexAt(offset);
-            return [
-                vAt(-1, 1, -1), vAt(-1, -1, -1), vAt(-1, -1, 1), 
-                vAt(-1, 1, -1), vAt(-1, -1, 1), vAt(-1, 1, 1), 
-            ];
-        };
+        const left = (vAt = vertexAt()) => [
+            vAt(-1, 1, -1), vAt(-1, -1, -1), vAt(-1, -1, 1), 
+            vAt(-1, 1, -1), vAt(-1, -1, 1), vAt(-1, 1, 1), 
+        ];
         // prettier-ignore
-        const right = (offset) => {
-            const vAt = vertexAt(offset);
-            return [
-                vAt(1, -1, 1), vAt(1, -1, -1), vAt(1, 1, -1), 
-                vAt(1, 1, 1), vAt(1, -1, 1), vAt(1, 1, -1), 
-            ];
-        };
+        const right = (vAt = vertexAt()) => [
+            vAt(1, -1, 1), vAt(1, -1, -1), vAt(1, 1, -1), 
+            vAt(1, 1, 1), vAt(1, -1, 1), vAt(1, 1, -1), 
+        ];
         // prettier-ignore
-        const back = (offset) => {
-            const vAt = vertexAt(offset);
-            return [
-                vAt(1, 1, -1), vAt(1, -1, -1), vAt(-1, -1, -1),
-                vAt(-1, 1, -1), vAt(1, 1, -1), vAt(-1, -1, -1)
-            ]
-        };
+        const back = (vAt = vertexAt()) => [
+            vAt(1, 1, -1), vAt(1, -1, -1), vAt(-1, -1, -1),
+            vAt(-1, 1, -1), vAt(1, 1, -1), vAt(-1, -1, -1)
+        ];
 
-        const rightFour = {ox: 4};
+        const rightFour = vertexAt({ox: 4,});
 
         const indices = [
             ...front(), ...top(), ...bottom(), 
