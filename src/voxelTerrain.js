@@ -15,57 +15,50 @@ export default class VoxelTerrain {
         this._cells = [];
     }
 
-    _cube(size = 1, offset) {
-      if(!offset) offset = new Vector3();
-        return [
-            // front
-            -1, -1, 1, 1, -1, 1, -1, 1, 1, 
-            -1, 1, 1, 1, -1, 1, 1, 1, 1,
-            // back
-            1, -1, -1, -1, -1, -1, 1, 1, -1, 
-            1, 1, -1, -1, -1, -1, -1, 1, -1,
-            // left
-            -1, -1, -1, -1, -1, 1, -1, 1, -1, 
-            -1, 1, -1, -1, -1, 1, -1, 1, 1,
-            // right
-            1, -1, 1, 1, -1, -1, 1, 1, 1, 
-            1, 1, 1, 1, -1, -1, 1, 1, -1,
-            // top
-            1, 1, -1, -1, 1, -1, 1, 1, 1, 
-            1, 1, 1, -1, 1, -1, -1, 1, 1,
-            // bottom
-            1, -1, 1, -1, -1, 1, 1, -1, -1, 
-            1, -1, -1, -1, -1, 1, -1, -1, -1,
-        ].map((v, i) => {
-          const pos = i % 3;
+    _cube() {
+        const vertices = [
+            -1, -1, 1,  //leftBottomFar
+            1, -1, 1,   //rightBottomFar
+            1, 1, 1,    //rightTopFar
+            -1, 1, 1,   //leftTopFar
 
-          if(pos == 2) return v * size + offset.x;
-          if(pos == 1) return v * size + offset.y;
-          if(pos == 0) return v * size + offset.z;
-        });
+            -1, -1, -1, //leftBottomNear
+            1, -1, -1,  //rightBottomNear
+            1, 1, -1,   //rightTopNear
+            -1, 1, -1,  //leftTopNear
+        ]; 
+
+        const indices = [
+            0, 1, 2, 0, 2, 3, //front
+            0, 4, 1, 5, 1, 4, //bottom
+            6, 3, 2, 6, 7, 3, //top
+            6, 5, 4, 6, 4, 7, //back
+            0, 3, 4, 3, 7, 4, // left
+            1, 5, 2, 5, 6, 2
+        ];
+
+        return { vertices, indices };
     }
 
     view() {
-        const vertices = new Float32Array([
-            ...this._cube(),
-            ...this._cube(1, new Vector3(0, 0, 2)),
-            ...this._cube(1, new Vector3(2, 0, 0)),
-            ...this._cube(1, new Vector3(2, 0, 2))
-        ]);
-        
+        const voxel = this._cube();
+
         const geometry = new BufferGeometry();
         geometry.setAttribute(
             'position',
-            new BufferAttribute(vertices, 3)
+            new BufferAttribute(
+                new Float32Array(voxel.vertices), 3)
         );
+        geometry.setIndex(voxel.indices);
         geometry.computeVertexNormals();
 
         const mesh = new Mesh(
             geometry,
             new MeshStandardMaterial({ color: 0xffffff, wireframe: false })
         );
-
+        mesh.name = 'terrain';
         mesh.position.set(0, 50, 0);
+
         return mesh;
     }
 }

@@ -36,6 +36,7 @@ export default class Controls {
         if (!currentPosition.equals(this._previousPosition)) {
             const { x, y, z } = currentPosition;
             this._orbitControls.target.set(x, y, z);
+
             this._orbitControls.update();
         }
     }
@@ -66,9 +67,11 @@ export default class Controls {
                         )
                 );
 
-            // if (intersects && intersects.length) {
-            // if(!this._options.excludeSelecting.some(e => intersects.object.name === e)) {
             if (intersects.length) {
+                const newPos = this._orbitControls.target
+                    .clone()
+                    .add(new THREE.Vector3(10, 10, 0));
+                this._camera.position.set(newPos.x, newPos.y, newPos.y);
                 this._activeObject = intersects[0].object;
             }
         });

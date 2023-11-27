@@ -28,7 +28,7 @@ export default class Builder {
         const near = 1.0;
         const far = 1000.0;
         this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-        this._camera.position.set(0, 125, 50);
+        this._camera.position.set(0, 70, 30);
     }
 
     addDirectionalLight(pos) {
@@ -72,7 +72,6 @@ export default class Builder {
         cube.name = 'cube';
 
         const terrain = new VoxelTerrain(1000);
-
         this._scene.add(terrain.view());
 
         this._controller = new Controller(this._scene, {
@@ -93,7 +92,7 @@ export default class Builder {
                 move: (obj, vec) => {
                     this._controller.move(obj, vec);
                 },
-                activeObjectName: 'cube',
+                activeObjectName: 'terrain',
                 excludeSelecting: ['terrain'],
             }
         );
