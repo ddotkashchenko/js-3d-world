@@ -70,7 +70,8 @@ export default class Builder {
 
         const cube = makeCube(2);
         cube.name = 'cube';
-
+        cube.position.set(10, 50, 0);
+        
         const terrain = new VoxelTerrain(1000);
         this._scene.add(terrain.view());
 
