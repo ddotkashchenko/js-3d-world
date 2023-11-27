@@ -106,7 +106,7 @@ export default class VoxelTerrain {
             new MeshPhongMaterial({
                 color: 0xaaaaff,
                 flatShading: true,
-                wireframe: true,
+                wireframe: false,
             })
         );
         mesh.name = 'terrain';
