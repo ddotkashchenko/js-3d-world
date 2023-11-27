@@ -14,87 +14,80 @@ export default class VoxelTerrain {
     }
 
     _construct(cells) {
-        const wall = (ox = 0, oz = 0) => [
-            -1 + ox, -1, oz,      // 0
-            1 + ox, -1, oz,       // 1
-            1 + ox, 1, oz,        // 2
-            -1 + ox, 1, oz,       // 3
-        ];
 
-        const wallX = (ox = 0, oz = 0) => [
-            ox, -1, -1 + oz,
-            ox, -1, 1 + oz,
-            ox, 1, 1 + oz,
-            ox, 1, -1 + oz,
-        ];
+        const verticesGrouped = [];
 
-        const front = (offset = 0) => [
-            offset, offset + 1, offset + 2, offset, offset + 2, offset + 3
-        ];
-        const top = (offset = 0) => [
-            offset + 6, offset + 3, offset + 2, offset + 6, offset + 7, offset + 3
-        ];
-        const bottom = (offset = 0) => [
-            offset, offset + 4, offset + 1, offset + 5, offset + 1, offset + 4
-        ];
-        const left = (offset = 0) => [
-            offset + 0, offset + 3, offset + 4, offset + 3, offset + 7, offset + 4
-        ];
-        const right = (offset = 0) => [
-            offset + 1, offset + 5, offset + 2, offset + 5, offset + 6, offset + 2
-        ];
-        const back = (offset = 0) => [
-            offset + 6, offset + 5, offset + 4, offset + 7, offset + 6, offset + 4
-        ];
+        const vertexAt = (offset) => (x, y, z) => {
+            const { ox, oy, oz } = { ...{ ox: 0, oy: 0, oz: 0 }, ...offset };
+            const index = verticesGrouped.findIndex(
+                ([vx, vy, vz]) => x + ox === vx && y + oy === vy && z + oz == vz
+            );
+            return index === -1
+                ? verticesGrouped.push([x + ox, y + oy, z + oz]) - 1
+                : index;
+        };
 
         // prettier-ignore
-        const vertices = [
-            ...wall(),
-            ...wall(0, -2),
-            ...wall(0, -4),
-            ...wall(0, -6),
-
-            ...wall(0, -8),
-            ...wall(0, -10),
-            
-            ...wall(2, -8),
-            ...wall(2, -10),
-        ];
-
+        const front = (offset) => {
+            const vAt = vertexAt(offset);
+            return [
+                vAt(-1, -1, 1), vAt(1, -1, 1), vAt(1, 1, 1),
+                vAt(-1, -1, 1), vAt(1, 1, 1), vAt(-1, 1, 1)
+            ]
+        };
         // prettier-ignore
+        const top = (offset) => {
+            const vAt = vertexAt(offset);
+            return [
+                vAt(1, 1, 1), vAt(1, 1, -1), vAt(-1, 1, -1),
+                vAt(-1, 1, 1), vAt(1, 1, 1), vAt(-1, 1, -1)
+            ];
+        };
+        // prettier-ignore
+        const bottom = (offset) => {
+            const vAt = vertexAt(offset);
+            return [
+                vAt(1, -1, -1), vAt(1, -1, 1), vAt(-1, -1, 1), 
+                vAt(-1, -1, -1), vAt(1, -1, -1), vAt(-1, -1, 1), 
+            ];
+        };
+        // prettier-ignore
+        const left = (offset) => {
+            const vAt = vertexAt(offset);
+            return [
+                vAt(-1, 1, -1), vAt(-1, -1, -1), vAt(-1, -1, 1), 
+                vAt(-1, 1, -1), vAt(-1, -1, 1), vAt(-1, 1, 1), 
+            ];
+        };
+        // prettier-ignore
+        const right = (offset) => {
+            const vAt = vertexAt(offset);
+            return [
+                vAt(1, -1, 1), vAt(1, -1, -1), vAt(1, 1, -1), 
+                vAt(1, 1, 1), vAt(1, -1, 1), vAt(1, 1, -1), 
+            ];
+        };
+        // prettier-ignore
+        const back = (offset) => {
+            const vAt = vertexAt(offset);
+            return [
+                vAt(1, 1, -1), vAt(1, -1, -1), vAt(-1, -1, -1),
+                vAt(-1, 1, -1), vAt(1, 1, -1), vAt(-1, -1, -1)
+            ]
+        };
+
+        const rightFour = {ox: 4};
+
         const indices = [
-            ...front(),
+            ...front(), ...top(), ...bottom(), 
+            ...left(), ...right(), ...back(),
 
-            ...bottom(),
-            ...top(), 
-            ...left(), 
-            ...right(), 
-
-            ...bottom(4), 
-            ...top(4), 
-            ...left(4), 
-            ...right(4),
-
-            ...bottom(8), 
-            ...top(8), 
-            ...left(8), 
-            ...right(8), 
-
-            ...back(8),
-
-            ...front(16),
-
-            ...bottom(16), 
-            ...top(16), 
-            ...left(16), 
-
-            ...back(16),
-
-            ...back(20),
+            ...front(rightFour), ...top(rightFour), ...bottom(rightFour), 
+            ...left(rightFour), ...right(rightFour), ...back(rightFour),
         ];
 
         return {
-            vertices,
+            vertices: verticesGrouped.flat(),
             indices,
         };
     }
