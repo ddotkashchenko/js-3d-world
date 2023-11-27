@@ -1,11 +1,8 @@
 import {
-    BoxGeometry,
     BufferAttribute,
     BufferGeometry,
     Mesh,
     MeshPhongMaterial,
-    MeshStandardMaterial,
-    Vector3,
 } from 'three';
 
 export default class VoxelTerrain {
@@ -17,11 +14,18 @@ export default class VoxelTerrain {
     }
 
     _construct(cells) {
-        const wall = (offset = 0) => [
-            -1, -1, offset,      // 0
-            1, -1, offset,       // 1
-            1, 1, offset,        // 2
-            -1, 1, offset,       // 3
+        const wall = (ox = 0, oz = 0) => [
+            -1 + ox, -1, oz,      // 0
+            1 + ox, -1, oz,       // 1
+            1 + ox, 1, oz,        // 2
+            -1 + ox, 1, oz,       // 3
+        ];
+
+        const wallX = (ox = 0, oz = 0) => [
+            ox, -1, -1 + oz,
+            ox, -1, 1 + oz,
+            ox, 1, 1 + oz,
+            ox, 1, -1 + oz,
         ];
 
         const front = (offset = 0) => [
@@ -46,12 +50,15 @@ export default class VoxelTerrain {
         // prettier-ignore
         const vertices = [
             ...wall(),
-            ...wall(-2),
-            ...wall(-4),
-            ...wall(-6),
+            ...wall(0, -2),
+            ...wall(0, -4),
+            ...wall(0, -6),
 
-            ...wall(-8),
-            ...wall(-10),
+            ...wall(0, -8),
+            ...wall(0, -10),
+            
+            ...wall(2, -8),
+            ...wall(2, -10),
         ];
 
         // prettier-ignore
@@ -76,12 +83,14 @@ export default class VoxelTerrain {
             ...back(8),
 
             ...front(16),
+
             ...bottom(16), 
             ...top(16), 
             ...left(16), 
-            ...right(16),
 
-            ...back(16)
+            ...back(16),
+
+            ...back(20),
         ];
 
         return {
