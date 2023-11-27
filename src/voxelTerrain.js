@@ -58,14 +58,30 @@ export default class VoxelTerrain {
             vAt(-1, 1, -1), vAt(1, 1, -1), vAt(-1, -1, -1)
         ];
 
-        const rightFour = vertexAt({ox: 4,});
+        const forward2 = vertexAt({oz: 2,});
+        const forward4 = vertexAt({oz: 4,});
+        const forward4left2 = vertexAt({ox: 2, oz: 4});
+        const up = vertexAt({oy: 2});
 
         const indices = [
-            ...front(), ...top(), ...bottom(), 
-            ...left(), ...right(), ...back(),
+            ...back(),
 
-            ...front(rightFour), ...top(rightFour), ...bottom(rightFour), 
-            ...left(rightFour), ...right(rightFour), ...back(rightFour),
+            ...bottom(), 
+            ...left(), ...right(), 
+            
+            ...top(forward2), ...bottom(forward2), 
+            ...left(forward2), ...right(forward2),
+
+            ...top(forward4), ...bottom(forward4), 
+            ...left(forward4), 
+            
+            ...top(forward4left2), ...bottom(forward4left2),
+            ...front(forward4left2), ...back(forward4left2),
+            ...right(forward4left2),
+
+            ...front(up), ...back(up), ...left(up), ...right(up), ...top(up),
+
+            ...front(forward4),
         ];
 
         return {
@@ -90,7 +106,7 @@ export default class VoxelTerrain {
             new MeshPhongMaterial({
                 color: 0xaaaaff,
                 flatShading: true,
-                wireframe: false,
+                wireframe: true,
             })
         );
         mesh.name = 'terrain';
