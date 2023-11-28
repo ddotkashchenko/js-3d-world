@@ -14,10 +14,9 @@ export default class VoxelTerrain {
     }
 
     _construct(cells) {
-
         const verticesGrouped = [];
 
-        const vertexAt = (offset) => (x, y, z) => {
+        const offsetVertex = (offset) => (x, y, z) => {
             const { ox, oy, oz } = { ...{ ox: 0, oy: 0, oz: 0 }, ...offset };
             const index = verticesGrouped.findIndex(
                 ([vx, vy, vz]) => x + ox === vx && y + oy === vy && z + oz == vz
@@ -28,61 +27,81 @@ export default class VoxelTerrain {
         };
 
         // prettier-ignore
-        const front = (vAt = vertexAt()) => [
-            vAt(-1, -1, 1), vAt(1, -1, 1), vAt(1, 1, 1),
-            vAt(-1, -1, 1), vAt(1, 1, 1), vAt(-1, 1, 1)
+        const front = (v = offsetVertex()) => [
+            v(-1, -1, 1), v(1, -1, 1), v(1, 1, 1),
+            v(-1, -1, 1), v(1, 1, 1), v(-1, 1, 1)
         ];
         // prettier-ignore
-        const top = (vAt = vertexAt()) => [
-            vAt(1, 1, 1), vAt(1, 1, -1), vAt(-1, 1, -1),
-            vAt(-1, 1, 1), vAt(1, 1, 1), vAt(-1, 1, -1)
+        const top = (v = offsetVertex()) => [
+            v(1, 1, 1), v(1, 1, -1), v(-1, 1, -1),
+            v(-1, 1, 1), v(1, 1, 1), v(-1, 1, -1)
         ];
         // prettier-ignore
-        const bottom = (vAt = vertexAt()) => [
-            vAt(1, -1, -1), vAt(1, -1, 1), vAt(-1, -1, 1), 
-            vAt(-1, -1, -1), vAt(1, -1, -1), vAt(-1, -1, 1), 
+        const bottom = (v = offsetVertex()) => [
+            v(1, -1, -1), v(1, -1, 1), v(-1, -1, 1), 
+            v(-1, -1, -1), v(1, -1, -1), v(-1, -1, 1), 
         ];
         // prettier-ignore
-        const left = (vAt = vertexAt()) => [
-            vAt(-1, 1, -1), vAt(-1, -1, -1), vAt(-1, -1, 1), 
-            vAt(-1, 1, -1), vAt(-1, -1, 1), vAt(-1, 1, 1), 
+        const left = (v = offsetVertex()) => [
+            v(-1, 1, -1), v(-1, -1, -1), v(-1, -1, 1), 
+            v(-1, 1, -1), v(-1, -1, 1), v(-1, 1, 1), 
         ];
         // prettier-ignore
-        const right = (vAt = vertexAt()) => [
-            vAt(1, -1, 1), vAt(1, -1, -1), vAt(1, 1, -1), 
-            vAt(1, 1, 1), vAt(1, -1, 1), vAt(1, 1, -1), 
+        const right = (v = offsetVertex()) => [
+            v(1, -1, 1), v(1, -1, -1), v(1, 1, -1), 
+            v(1, 1, 1), v(1, -1, 1), v(1, 1, -1), 
         ];
         // prettier-ignore
-        const back = (vAt = vertexAt()) => [
-            vAt(1, 1, -1), vAt(1, -1, -1), vAt(-1, -1, -1),
-            vAt(-1, 1, -1), vAt(1, 1, -1), vAt(-1, -1, -1)
+        const back = (v = offsetVertex()) => [
+            v(1, 1, -1), v(1, -1, -1), v(-1, -1, -1),
+            v(-1, 1, -1), v(1, 1, -1), v(-1, -1, -1)
         ];
 
-        const forward2 = vertexAt({oz: 2,});
-        const forward4 = vertexAt({oz: 4,});
-        const forward4left2 = vertexAt({ox: 2, oz: 4});
-        const up = vertexAt({oy: 2});
+        const isBoundaryTop = ([cx, cy, cz]) =>
+            !cells.some(
+                ([vx, vy, vz]) => cx === vx && cy + 1=== vy && cz === vz
+            );
+        const isBoundaryBottom = ([cx, cy, cz]) =>
+            !cells.some(
+                ([vx, vy, vz]) => cx === vx && cy - 1 === vy  && cz === vz
+            );
+        const isBoundaryLeft = ([cx, cy, cz]) =>
+            !cells.some(
+                ([vx, vy, vz]) => cx - 1=== vx && cy === vy && cz === vz
+            );
+        const isBoundaryRight = ([cx, cy, cz]) =>
+            !cells.some(
+                ([vx, vy, vz]) => cx + 1 === vx && cy === vy && cz === vz
+            );
+        const isBoundaryFront = ([cx, cy, cz]) =>
+            !cells.some(
+                ([vx, vy, vz]) => cx === vx && cy === vy && cz + 1 === vz
+            );
+        const isBoundaryBack = ([cx, cy, cz]) =>
+            !cells.some(
+                ([vx, vy, vz]) => cx === vx && cy === vy && cz - 1 === vz
+            );
 
-        const indices = [
-            ...back(),
-
-            ...bottom(), 
-            ...left(), ...right(), 
-            
-            ...top(forward2), ...bottom(forward2), 
-            ...left(forward2), ...right(forward2),
-
-            ...top(forward4), ...bottom(forward4), 
-            ...left(forward4), 
-            
-            ...top(forward4left2), ...bottom(forward4left2),
-            ...front(forward4left2), ...back(forward4left2),
-            ...right(forward4left2),
-
-            ...front(up), ...back(up), ...left(up), ...right(up), ...top(up),
-
-            ...front(forward4),
-        ];
+        let indices = cells.map(([cx, cy, cz]) => [
+            ...(isBoundaryTop([cx, cy, cz])
+                ? top(offsetVertex({ ox: cx * 2, oy: cy * 2, oz: cz * 2 }))
+                : []),
+            ...(isBoundaryBottom([cx, cy, cz])
+                ? bottom(offsetVertex({ ox: cx * 2, oy: cy * 2, oz: cz * 2 }))
+                : []),
+            ...(isBoundaryLeft([cx, cy, cz])
+                ? left(offsetVertex({ ox: cx * 2, oy: cy * 2, oz: cz * 2 }))
+                : []),
+            ...(isBoundaryRight([cx, cy, cz])
+                ? right(offsetVertex({ ox: cx * 2, oy: cy * 2, oz: cz * 2 }))
+                : []),
+            ...(isBoundaryFront([cx, cy, cz])
+                ? front(offsetVertex({ ox: cx * 2, oy: cy * 2, oz: cz * 2 }))
+                : []),
+            ...(isBoundaryBack([cx, cy, cz])
+                ? back(offsetVertex({ ox: cx * 2, oy: cy * 2, oz: cz * 2 }))
+                : []),
+        ]).flat();
 
         return {
             vertices: verticesGrouped.flat(),
@@ -91,7 +110,16 @@ export default class VoxelTerrain {
     }
 
     view() {
-        const voxels = this._construct();
+        const cells = [
+            [0, 0, 0],
+            [0, 0, 1],
+            [0, 0, 2],
+            [0, 0, 3],
+            [1, 0, 3],
+            [0, 1, 0],
+        ];
+
+        const voxels = this._construct(cells);
 
         const geometry = new BufferGeometry();
         geometry.setAttribute(
