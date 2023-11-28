@@ -2,8 +2,10 @@ import {
     MeshStandardMaterial,
     PlaneGeometry,
     BoxGeometry,
-    Mesh
+    Mesh,
+    Vector3,
 } from 'three';
+import VoxelMesh from './voxelMesh';
 
 function makePlane(size, segments) {
     const plane = new Mesh(
@@ -22,11 +24,34 @@ function makeCube(size) {
         new BoxGeometry(size, size, size, 1, 1, 1),
         new MeshStandardMaterial({ color: 0xff5555 })
     );
-    
+
     cube.castShadow = true;
     cube.receiveShadow = true;
 
     return cube;
 }
 
-export { makePlane, makeCube };
+function makePyramid(height) {
+    const pyramid4 = [...Array(height).keys()]
+        .map((y) => {
+            const res = [];
+            const width = height - 1 - y;
+            for (var x = -width; x <= width; x++)
+                for (var z = -width; z <= width; z++) {
+                    if (y !== 1 || z !== 0) res.push([x, y, z]);
+                }
+
+            return res;
+        })
+        .flat();
+
+    const voxelMesh = new VoxelMesh({
+        size: 2,
+        name: 'pyramid',
+        position: new Vector3().setComponent(1, 50),
+    });
+
+    return voxelMesh.construct(pyramid4);
+}
+
+export { makePlane, makeCube, makePyramid };

@@ -2,9 +2,9 @@ import * as THREE from 'three';
 import World from './world';
 import Controller from './controller';
 import Controls from './controls';
-import VoxelTerrain from './voxelTerrain';
+// import VoxelTerrain from './voxelTerrain';
 import { fromImage } from './heightmap';
-import { makeCube, makePlane } from './scene';
+import { makeCube, makePlane, makePyramid } from './scene';
 
 export default class Builder {
     constructor() {
@@ -68,10 +68,10 @@ export default class Builder {
 
         const cube = makeCube(2);
         cube.name = 'cube';
-        cube.position.set(10, 50, 0);
+        cube.position.set(0, 60, 0);
         
-        const terrain = new VoxelTerrain(1000);
-        this._scene.add(terrain.view());
+        const pyramid = makePyramid(4);
+        this._scene.add(pyramid);
 
         this._controller = new Controller(this._scene, {
             terrain: plane,
@@ -91,7 +91,7 @@ export default class Builder {
                 move: (obj, vec) => {
                     this._controller.move(obj, vec);
                 },
-                activeObjectName: 'terrain',
+                activeObjectName: 'pyramid',
                 excludeSelecting: ['terrain'],
             }
         );

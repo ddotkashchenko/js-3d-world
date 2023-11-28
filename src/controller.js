@@ -15,8 +15,8 @@ export default class Controller {
     }
 
     step(t) {
-        this.makeObjectSpin('cube');
-        this.makeObjectSpin('terrain');
+        this.makeObjectSpin('cube', -0.01);
+        this.makeObjectSpin('pyramid', 0.01);
     }
 
     async move(obj, vec) {
@@ -46,8 +46,8 @@ export default class Controller {
         );
     }
 
-    makeObjectSpin(name) {
+    makeObjectSpin(name, speed) {
         const cube = this._scene.getObjectByName(name);
-        cube.rotateY(0.01);
+        cube.rotateY(speed);
     }
 }
