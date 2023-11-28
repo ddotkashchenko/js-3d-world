@@ -17,7 +17,7 @@ class Heightmap {
 
             const xf = (vertex.x + size * 0.5) / size;
             const yf = (vertex.y + size * 0.5) / size;
-            const height = this.get(xf, yf) || 0;
+            const height = this._get(xf, yf) || 0;
 
             positionAttribute.setZ(i, height * options.strenth);
         }
@@ -26,10 +26,23 @@ class Heightmap {
         geometry.computeVertexNormals();
     }
 
-    setHeight(vec, size) {
-        const xf = (vec.x + size * 0.5) / size;
-        const yf = (vec.y + size * 0.5) / size;
-        return this.get(xf, yf) * 7 || 0;
+    voxelize(resolution) {
+        const cellSize = Math.ceil(255 / resolution);
+        let cells = [];
+
+        for (let x = 0; x < this._width; x += cellSize) {
+            for (let z = 0; z < this._height; z += cellSize) {
+                const height = this._get(x - cellSize / 2, z - cellSize / 2) || 0;
+                const heightCells = Math.ceil(height / cellSize);
+
+                cells = [
+                    ...cells,
+                    ...[...Array(heightCells).keys()].map((y) => [x, y, z]),
+                ];
+            }
+        }
+
+        return cells;
     }
 
     _pixelAt(x, y) {
@@ -37,7 +50,7 @@ class Heightmap {
         return this._heightData.data[pos] / 255.0;
     }
 
-    get(xf, yf) {
+    _get(xf, yf) {
         const w = this._width - 1;
         const h = this._height - 1;
 

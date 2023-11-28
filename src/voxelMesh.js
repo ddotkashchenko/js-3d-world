@@ -7,10 +7,14 @@ import {
 } from 'three';
 
 export default class VoxelMesh {
-    constructor(options = { size: 2, position: new Vector3() }) {
+    constructor(options) {
+
+        options = { size: 2, position: new Vector3(), ...options };
+
         this._position = options.position;
         this._size = options.size;
         this._name = options.name;
+        this._material = options.material;
     }
 
     _construct(cells) {
@@ -119,20 +123,7 @@ export default class VoxelMesh {
     }
 
     construct(cells) {
-        const pyramid4 = [...Array(4).keys()]
-            .map((y) => {
-                const res = [];
-                const width = 3 - y;
-                for (var x = -width; x <= width; x++)
-                    for (var z = -width; z <= width; z++) {
-                        if (y !== 1 || z !== 0) res.push([x, y, z]);
-                    }
-
-                return res;
-            })
-            .flat();
-
-        const voxels = this._construct(pyramid4);
+        const voxels = this._construct(cells);
 
         const geometry = new BufferGeometry();
         geometry.setAttribute(
@@ -149,6 +140,7 @@ export default class VoxelMesh {
                 color: 0xaaaaff,
                 flatShading: true,
                 wireframe: false,
+                ...this._material
             })
         );
         mesh.name = this._name;

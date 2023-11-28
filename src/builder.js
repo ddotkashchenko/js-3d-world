@@ -5,6 +5,7 @@ import Controls from './controls';
 // import VoxelTerrain from './voxelTerrain';
 import { fromImage } from './heightmap';
 import { makeCube, makePlane, makePyramid } from './scene';
+import VoxelMesh from './voxelMesh';
 
 export default class Builder {
     constructor() {
@@ -64,12 +65,21 @@ export default class Builder {
         plane.name = 'terrain';
         plane.scale.add(new THREE.Vector3(10, 10, 10));
 
-        heightMap.updatePlane(plane.geometry, 100, { strenth: 7 });
+        heightMap.updatePlane(plane.geometry, 170, { strenth: 7 });
+
+        const terrain = new VoxelMesh({
+            size: 2,
+            material: {color: 0xbce791, wireframe: true},
+        });
+
+        const cells = heightMap.voxelize(4);
+        const terrainMesh = terrain.construct(cells);
+        this._scene.add(terrainMesh);
 
         const cube = makeCube(2);
         cube.name = 'cube';
         cube.position.set(0, 60, 0);
-        
+
         const pyramid = makePyramid(4);
         this._scene.add(pyramid);
 
@@ -111,6 +121,4 @@ export default class Builder {
 
         return world;
     }
-
-    
 }
