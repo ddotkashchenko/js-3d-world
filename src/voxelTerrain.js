@@ -110,31 +110,36 @@ export default class VoxelTerrain {
     }
 
     view() {
-        const cells = [
-            [0, 0, 0],
-            [0, 0, 1],
-            [0, 0, 2],
-            [0, 0, 3],
-            [1, 0, 3],
-            [0, 1, 0],
-        ];
 
-        const voxels = this._construct(cells);
+        const pyramid4 = [...Array(4).keys()]
+            .map(y => {
+                const res = [];
+                const width = 3 - y;
+                for(var x = -width; x <= width; x++)
+                    for(var z = -width; z <= width; z++) {
+                        if(y !== 1 || z !== 0)
+                            res.push([x, y, z]);
+                }
+
+                return res;
+            }).flat();
+
+        const voxels = this._construct(pyramid4);
 
         const geometry = new BufferGeometry();
         geometry.setAttribute(
             'position',
             new BufferAttribute(new Float32Array(voxels.vertices), 3)
         );
-
+        
         geometry.setIndex(voxels.indices);
+        geometry.computeVertexNormals();
 
         const mesh = new Mesh(
             geometry,
             new MeshPhongMaterial({
                 color: 0xaaaaff,
                 flatShading: true,
-                wireframe: false,
             })
         );
         mesh.name = 'terrain';
