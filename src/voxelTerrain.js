@@ -15,15 +15,21 @@ export default class VoxelTerrain {
 
     _construct(cells) {
         const verticesGrouped = [];
+        const verticesLookup = {};
 
-        const offsetVertex = (offset) => (x, y, z) => {
-            const { ox, oy, oz } = { ...{ ox: 0, oy: 0, oz: 0 }, ...offset };
-            const index = verticesGrouped.findIndex(
-                ([vx, vy, vz]) => x + ox === vx && y + oy === vy && z + oz == vz
-            );
-            return index === -1
-                ? verticesGrouped.push([x + ox, y + oy, z + oz]) - 1
-                : index;
+        const offsetVertex = ([ox, oy, oz] = [0, 0, 0]) => (x, y, z) => {
+
+            const key = `${x + ox}.${y + oy}.${z + oz}`;
+            let index = verticesLookup[key];
+
+            if(index) {
+                return index;
+            }
+
+            index = verticesGrouped.push([x + ox, y + oy, z + oz]) - 1;
+            verticesLookup[key] = index;
+
+            return index;
         };
 
         // prettier-ignore
@@ -81,25 +87,26 @@ export default class VoxelTerrain {
             !cells.some(
                 ([vx, vy, vz]) => cx === vx && cy === vy && cz - 1 === vz
             );
+        const size = 2;
 
-        let indices = cells.map(([cx, cy, cz]) => [
-            ...(isBoundaryTop([cx, cy, cz])
-                ? top(offsetVertex({ ox: cx * 2, oy: cy * 2, oz: cz * 2 }))
+        let indices = cells.map(cell => [
+            ...(isBoundaryTop(cell)
+                ? top(offsetVertex(cell.map(c => c * size)))
                 : []),
-            ...(isBoundaryBottom([cx, cy, cz])
-                ? bottom(offsetVertex({ ox: cx * 2, oy: cy * 2, oz: cz * 2 }))
+            ...(isBoundaryBottom(cell)
+                ? bottom(offsetVertex(cell.map(c => c * size)))
                 : []),
-            ...(isBoundaryLeft([cx, cy, cz])
-                ? left(offsetVertex({ ox: cx * 2, oy: cy * 2, oz: cz * 2 }))
+            ...(isBoundaryLeft(cell)
+                ? left(offsetVertex(cell.map(c => c * size)))
                 : []),
-            ...(isBoundaryRight([cx, cy, cz])
-                ? right(offsetVertex({ ox: cx * 2, oy: cy * 2, oz: cz * 2 }))
+            ...(isBoundaryRight(cell)
+                ? right(offsetVertex(cell.map(c => c * size)))
                 : []),
-            ...(isBoundaryFront([cx, cy, cz])
-                ? front(offsetVertex({ ox: cx * 2, oy: cy * 2, oz: cz * 2 }))
+            ...(isBoundaryFront(cell)
+                ? front(offsetVertex(cell.map(c => c * size)))
                 : []),
-            ...(isBoundaryBack([cx, cy, cz])
-                ? back(offsetVertex({ ox: cx * 2, oy: cy * 2, oz: cz * 2 }))
+            ...(isBoundaryBack(cell)
+                ? back(offsetVertex(cell.map(c => c * size)))
                 : []),
         ]).flat();
 
@@ -140,6 +147,7 @@ export default class VoxelTerrain {
             new MeshPhongMaterial({
                 color: 0xaaaaff,
                 flatShading: true,
+                wireframe: false
             })
         );
         mesh.name = 'terrain';

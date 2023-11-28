@@ -30,16 +30,3 @@ function makeCube(size) {
 }
 
 export { makePlane, makeCube };
-
-// export default (heightMap, size) => {
-//     const plane1 = makePlane(size, 800);
-//     plane1.scale.add(new Vector3(10, 10, 10));
-
-//     heightMap && heightMap.updatePlane(plane1.geometry, 100, { strenth: 7 });
-
-//     const cube = makeCube(2);
-//     const y = heightMap.setHeight(new Vector3(), 100)
-//     cube.position.set(0, y, 0);
-
-//     return [plane1, cube]; //Promise.resolve();
-// };
