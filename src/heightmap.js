@@ -29,11 +29,11 @@ class Heightmap {
     voxelize(resolution) {
         let cells = [];
         const cellSize = Math.ceil(255 / resolution);
-        const halftCellsWidth = this._width / cellSize * 2;
-        const halftCellsHeight = this._height / cellSize * 2;
+        const cellsHalfWidth = this._width / (cellSize * 2);
+        const cellsHalfHeight = this._height / (cellSize * 2);
         
-        let cellX = -halftCellsWidth;
-        let cellZ = -halftCellsHeight;
+        let cellX = -cellsHalfWidth;
+        let cellZ = -cellsHalfHeight;
 
         for (let x = 0; x < this._width; x += cellSize) {
             for (let z = 0; z < this._height; z += cellSize) {
@@ -48,7 +48,7 @@ class Heightmap {
                 cellZ++;
             }
             cellX++;
-            cellZ = -halftCellsHeight;
+            cellZ = -cellsHalfHeight;
         }
 
         return cells;
