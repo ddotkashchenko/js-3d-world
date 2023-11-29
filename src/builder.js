@@ -72,7 +72,7 @@ export default class Builder {
             material: {color: 0xbce791, wireframe: true},
         });
 
-        const cells = heightMap.voxelize(4);
+        const cells = heightMap.voxelize(4, 1000);
         const terrainMesh = terrain.construct(cells);
         this._scene.add(terrainMesh);
 

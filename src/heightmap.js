@@ -26,11 +26,19 @@ class Heightmap {
         geometry.computeVertexNormals();
     }
 
-    voxelize(resolution) {
+    voxelize(resolution, sizeXY) {
+        resolution = 2;
         let cells = [];
         const cellSize = Math.ceil(255 / resolution);
-        const cellsHalfWidth = this._width / (cellSize * 2);
-        const cellsHalfHeight = this._height / (cellSize * 2);
+        
+        const aspectRatio = Math.ceil(this._width / this._height);
+
+        // const cellsHalfWidth = sizeXY * aspectRatio / (cellSize * 2);
+        // const cellsHalfHeight = sizeXY / (cellSize * 2);
+        const stepXY = 12;
+
+        const cellsHalfWidth = Math.floor(this._width / (cellSize * 2)) * stepXY;
+        const cellsHalfHeight = Math.floor(this._height / (cellSize * 2)) * stepXY;
         
         let cellX = -cellsHalfWidth;
         let cellZ = -cellsHalfHeight;
@@ -39,15 +47,24 @@ class Heightmap {
             for (let z = 0; z < this._height; z += cellSize) {
 
                 const height = this._pixelAt(x + cellSize / 2, z + cellSize / 2) || 0;
-                const heightCells = Math.ceil(height * 255 / cellSize) + 1;
+                const heightCells = Math.ceil(height * 255 / cellSize) * 2 + 1;
 
                 cells = [
                     ...cells,
-                    ...[...Array(heightCells).keys()].map((cellY) => [cellX, cellY, cellZ]),
+                    ...[...Array(heightCells).keys()].map((cellY) => {
+                        let res = [];
+                        for(let repeatX = 0; repeatX < stepXY; repeatX++)
+                            for(let repeatZ = 0; repeatZ < stepXY; repeatZ++) {
+                               res.push([cellX + repeatX, cellY, cellZ + repeatZ]); 
+                        }
+                        return res;
+                    }).flat()
+                        // [...Array(stepXY - 1).keys()].map(repeatXY => 
+                        //     [cellX + repeatXY, cellY, cellZ + repeatXY])).flat()
                 ];
-                cellZ++;
+                cellZ+= stepXY;
             }
-            cellX++;
+            cellX+= stepXY;
             cellZ = -cellsHalfHeight;
         }
 
