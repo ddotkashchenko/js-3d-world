@@ -24,6 +24,11 @@ export default class VoxelMesh {
         const offsetVertex =
             ([ox, oy, oz] = [0, 0, 0]) =>
             (x, y, z) => {
+
+                x *= this._size;
+                y *= this._size;
+                z *= this._size;
+
                 const key = `${x + ox}.${y + oy}.${z + oz}`;
                 let index = verticesLookup[key];
 
@@ -94,26 +99,32 @@ export default class VoxelMesh {
             );
 
         let indices = cells
-            .map((cell) => [
+            .map((cell) => {
+                const cellWithSize = cell.map(c => c * 2 * this._size);
+                
+                const res = [
                 ...(isBoundaryTop(cell)
-                    ? top(offsetVertex(cell.map((c) => c * this._size)))
+                    ? top(offsetVertex(cellWithSize))
                     : []),
                 ...(isBoundaryBottom(cell)
-                    ? bottom(offsetVertex(cell.map((c) => c * this._size)))
+                    ? bottom(offsetVertex(cellWithSize))
                     : []),
                 ...(isBoundaryLeft(cell)
-                    ? left(offsetVertex(cell.map((c) => c * this._size)))
+                    ? left(offsetVertex(cellWithSize))
                     : []),
                 ...(isBoundaryRight(cell)
-                    ? right(offsetVertex(cell.map((c) => c * this._size)))
+                    ? right(offsetVertex(cellWithSize))
                     : []),
                 ...(isBoundaryFront(cell)
-                    ? front(offsetVertex(cell.map((c) => c * this._size)))
+                    ? front(offsetVertex(cellWithSize))
                     : []),
                 ...(isBoundaryBack(cell)
-                    ? back(offsetVertex(cell.map((c) => c * this._size)))
+                    ? back(offsetVertex(cellWithSize))
                     : []),
-            ])
+                ];
+
+                return res;
+            })
             .flat();
 
         return {

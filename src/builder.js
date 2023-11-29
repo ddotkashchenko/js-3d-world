@@ -61,35 +61,38 @@ export default class Builder {
             imgUrl: './iceland_heightmap.png',
         });
 
-        const plane = makePlane(1000, 500);
-        plane.name = 'terrain';
+        // const plane = makePlane(1000, 500);
+        // plane.name = 'terrain';
 
-        heightMap.updatePlane(plane.geometry, 1700, { strenth: 70 });
+        // heightMap.updatePlane(plane.geometry, 1700, { strenth: 70 });
+        // this._scene.add(plane);
 
         const terrain = new VoxelMesh({
             size: 2,
             name: 'voxelTerrain',
-            material: {color: 0xbce791, wireframe: true},
+            material: {color: 0xbce791, wireframe: false},
         });
 
-        const cells = heightMap.voxelize(4, 1000);
+        const cells = heightMap.voxelize(8);
         const terrainMesh = terrain.construct(cells);
+        terrainMesh.scale.set(2, 1, 2);
         this._scene.add(terrainMesh);
 
         const cube = makeCube(2);
         cube.name = 'cube';
         cube.position.set(0, 60, 0);
+        this._scene.add(cube);
 
-        const pyramid = makePyramid(4);
-        this._scene.add(pyramid);
+        this._scene.add(
+            makePyramid(4, 1, new THREE.Vector3(-10, 50, 0), {wireframe: false}),
+            // makePyramid(4, 4, new THREE.Vector3(20, 50, 0), {wireframe: false})
+        );
 
         this._controller = new Controller(this._scene, {
-            terrain: plane,
+            // terrain: plane,
         });
 
         this._next.push((t) => this._controller.step(t));
-
-        this._scene.add(plane, cube);
     }
 
     addControls() {
@@ -102,7 +105,7 @@ export default class Builder {
                     this._controller.move(obj, vec);
                 },
                 activeObjectName: 'pyramid',
-                excludeSelecting: ['terrain'],
+                excludeSelecting: ['terrain', 'voxelTerrain'],
             }
         );
 
