@@ -7,15 +7,41 @@ import {
 } from 'three';
 
 export default class VoxelMesh {
+    #mesh;
+
     constructor(options) {
 
-        options = { size: 2, position: new Vector3(), ...options };
+        this._options = { size: 1, position: new Vector3(), ...options };
 
-        this._position = options.position;
-        this._size = options.size;
-        this._name = options.name;
-        this._material = options.material;
+        // this._position = options.position;
+        // this._size = options.size;
+        // this._name = options.name;
+        // this._material = options.material;
+
+        this._initMesh();
+
+        Object.defineProperty(this, 'mesh', {
+            value: this.#mesh
+        });
     }
+
+    _initMesh() {
+        const mesh = new Mesh(
+            new BufferGeometry(),
+            new MeshPhongMaterial({
+                color: 0xaaaaff,
+                flatShading: true,
+                wireframe: false,
+                ...this._options.material
+            })
+        );
+        mesh.name = this._options.name;
+        mesh.position.set(this._options.position.x, this._options.position.y, this._options.position.z);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+
+        this.#mesh = mesh;
+    } 
 
     _construct(cells) {
         const verticesGrouped = [];
@@ -25,9 +51,9 @@ export default class VoxelMesh {
             ([ox, oy, oz] = [0, 0, 0]) =>
             (x, y, z) => {
 
-                x *= this._size;
-                y *= this._size;
-                z *= this._size;
+                x *= this._options.size;
+                y *= this._options.size;
+                z *= this._options.size;
 
                 const key = `${x + ox}.${y + oy}.${z + oz}`;
                 let index = verticesLookup[key];
@@ -100,7 +126,7 @@ export default class VoxelMesh {
 
         let indices = cells
             .map((cell) => {
-                const cellWithSize = cell.map(c => c * 2 * this._size);
+                const cellWithSize = cell.map(c => c * 2 * this._options.size);
                 
                 const res = [
                 ...(isBoundaryTop(cell)
@@ -136,29 +162,12 @@ export default class VoxelMesh {
     construct(cells) {
         const voxels = this._construct(cells);
 
-        const geometry = new BufferGeometry();
-        geometry.setAttribute(
+        this.#mesh.geometry.setAttribute(
             'position',
             new BufferAttribute(new Float32Array(voxels.vertices), 3)
-        );
-
-        geometry.setIndex(voxels.indices);
-        geometry.computeVertexNormals();
-
-        const mesh = new Mesh(
-            geometry,
-            new MeshPhongMaterial({
-                color: 0xaaaaff,
-                flatShading: true,
-                wireframe: false,
-                ...this._material
-            })
-        );
-        mesh.name = this._name;
-        mesh.position.set(this._position.x, this._position.y, this._position.z);
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-
-        return mesh;
+            );
+            
+        this.#mesh.geometry.setIndex(voxels.indices);
+        this.#mesh.geometry.computeVertexNormals();            
     }
 }

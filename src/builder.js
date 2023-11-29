@@ -68,15 +68,15 @@ export default class Builder {
         // this._scene.add(plane);
 
         const terrain = new VoxelMesh({
-            size: 2,
+            size: 1,
             name: 'voxelTerrain',
             material: {color: 0xbce791, wireframe: false},
         });
 
         const cells = heightMap.voxelize(8);
-        const terrainMesh = terrain.construct(cells);
-        terrainMesh.scale.set(2, 1, 2);
-        this._scene.add(terrainMesh);
+        terrain.construct(cells);
+
+        this._scene.add(terrain.mesh);
 
         const cube = makeCube(2);
         cube.name = 'cube';

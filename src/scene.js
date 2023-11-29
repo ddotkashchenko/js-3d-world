@@ -32,7 +32,7 @@ function makeCube(size) {
 }
 
 function makePyramid(height, size, position, material) {
-    const pyramid4 = [...Array(height).keys()]
+    const pyramidShape = [...Array(height).keys()]
         .map((y) => {
             const res = [];
             const width = height - 1 - y;
@@ -45,14 +45,16 @@ function makePyramid(height, size, position, material) {
         })
         .flat();
 
-    const voxelMesh = new VoxelMesh({
+    const pyramid = new VoxelMesh({
         size: size,
         name: 'pyramid',
         position,
         material
     });
 
-    return voxelMesh.construct(pyramid4);
+    pyramid.construct(pyramidShape);
+
+    return pyramid.mesh;
 }
 
 export { makePlane, makeCube, makePyramid };
