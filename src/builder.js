@@ -61,14 +61,14 @@ export default class Builder {
             imgUrl: './iceland_heightmap.png',
         });
 
-        const plane = makePlane(100, 500);
+        const plane = makePlane(1000, 500);
         plane.name = 'terrain';
-        plane.scale.add(new THREE.Vector3(10, 10, 10));
 
-        heightMap.updatePlane(plane.geometry, 170, { strenth: 7 });
+        heightMap.updatePlane(plane.geometry, 1700, { strenth: 70 });
 
         const terrain = new VoxelMesh({
             size: 2,
+            name: 'voxelTerrain',
             material: {color: 0xbce791, wireframe: true},
         });
 

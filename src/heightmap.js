@@ -27,19 +27,28 @@ class Heightmap {
     }
 
     voxelize(resolution) {
-        const cellSize = Math.ceil(255 / resolution);
         let cells = [];
+        const cellSize = Math.ceil(255 / resolution);
+        const halftCellsWidth = this._width / cellSize * 2;
+        const halftCellsHeight = this._height / cellSize * 2;
+        
+        let cellX = -halftCellsWidth;
+        let cellZ = -halftCellsHeight;
 
         for (let x = 0; x < this._width; x += cellSize) {
             for (let z = 0; z < this._height; z += cellSize) {
-                const height = this._get(x - cellSize / 2, z - cellSize / 2) || 0;
-                const heightCells = Math.ceil(height / cellSize);
+
+                const height = this._pixelAt(x + cellSize / 2, z + cellSize / 2) || 0;
+                const heightCells = Math.ceil(height * 255 / cellSize) + 1;
 
                 cells = [
                     ...cells,
-                    ...[...Array(heightCells).keys()].map((y) => [x, y, z]),
+                    ...[...Array(heightCells).keys()].map((cellY) => [cellX, cellY, cellZ]),
                 ];
+                cellZ++;
             }
+            cellX++;
+            cellZ = -halftCellsHeight;
         }
 
         return cells;
@@ -47,7 +56,7 @@ class Heightmap {
 
     _pixelAt(x, y) {
         const pos = (x + this._width * y) * 4;
-        return this._heightData.data[pos] / 255.0;
+        return this._heightData[pos] / 255.0;
     }
 
     _get(xf, yf) {
@@ -86,7 +95,7 @@ const fromImage = async ({ imgUrl }) => {
                 const context = canvas.getContext('2d');
                 context.drawImage(img, 0, 0);
 
-                const heightData = context.getImageData(
+                const imageData = context.getImageData(
                     0,
                     0,
                     img.width,
@@ -97,7 +106,7 @@ const fromImage = async ({ imgUrl }) => {
                     new Heightmap({
                         width: img.width,
                         height: img.height,
-                        heightData: heightData,
+                        heightData: imageData.data,
                     })
                 );
             });
