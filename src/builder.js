@@ -42,10 +42,10 @@ export default class Builder {
         directionalLight.shadow.mapSize.width = 2048;
         directionalLight.shadow.mapSize.height = 2048;
         directionalLight.shadow.camera.near = 0.01;
-        directionalLight.shadow.camera.far = 500.0;
-        directionalLight.shadow.camera.left = 100;
-        directionalLight.shadow.camera.right = -100;
-        directionalLight.shadow.camera.top = 100;
+        directionalLight.shadow.camera.far = 1500.0;
+        directionalLight.shadow.camera.left = 1000;
+        directionalLight.shadow.camera.right = -1000;
+        directionalLight.shadow.camera.top = 1000;
         directionalLight.shadow.camera.bottom = -100;
 
         this._scene.add(directionalLight);
@@ -67,16 +67,22 @@ export default class Builder {
         // heightMap.updatePlane(plane.geometry, 1700, { strenth: 70 });
         // this._scene.add(plane);
 
-        const terrain = new VoxelMesh({
-            size: 1,
-            name: 'voxelTerrain',
-            material: {color: 0xbce791, wireframe: false},
-        });
+        const makeTerrain = (size, res, position) => {
+            const terrain2 = new VoxelMesh({
+                size,
+                name: 'voxelTerrain',
+                position,
+                material: {color: 0xbce791, wireframe: false},
+            });
 
-        const cells = heightMap.voxelize(8);
-        terrain.construct(cells);
+            const cells2 = heightMap.voxelize2(res, res / 4);
+            terrain2.construct(cells2)
+            this._scene.add(terrain2.mesh);
+        };
 
-        this._scene.add(terrain.mesh);
+        makeTerrain(4, 16, new THREE.Vector3());
+        makeTerrain(2, 32, new THREE.Vector3().setComponent(1, -50));
+        makeTerrain(1, 64, new THREE.Vector3().setComponent(1, -100));
 
         const cube = makeCube(2);
         cube.name = 'cube';
@@ -104,8 +110,8 @@ export default class Builder {
                 move: (obj, vec) => {
                     this._controller.move(obj, vec);
                 },
-                activeObjectName: 'pyramid',
-                excludeSelecting: ['terrain', 'voxelTerrain'],
+                // activeObjectName: 'pyramid',
+                excludeSelecting: ['terrain'],
             }
         );
 

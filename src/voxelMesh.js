@@ -2,7 +2,10 @@ import {
     BufferAttribute,
     BufferGeometry,
     Mesh,
+    MeshBasicMaterial,
     MeshPhongMaterial,
+    MeshStandardMaterial,
+    MeshToonMaterial,
     Vector3,
 } from 'three';
 
@@ -28,7 +31,7 @@ export default class VoxelMesh {
     _initMesh() {
         const mesh = new Mesh(
             new BufferGeometry(),
-            new MeshPhongMaterial({
+            new MeshStandardMaterial({
                 color: 0xaaaaff,
                 flatShading: true,
                 wireframe: false,

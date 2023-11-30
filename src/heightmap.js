@@ -26,6 +26,34 @@ class Heightmap {
         geometry.computeVertexNormals();
     }
 
+    voxelize2(resolution, maxY) {
+        let cells = [];
+        const aspectRatio = this._width / this._height;
+        const cellSize = Math.ceil(this._width / resolution);
+        
+        const cellsHalfWidth = Math.floor(resolution / 2);
+        const cellsHalfHeight = Math.floor(cellsHalfWidth / aspectRatio);
+
+        let cellX = -cellsHalfWidth;
+        let cellZ = -cellsHalfHeight;
+
+        for (let x = 0; x < this._width; x += cellSize) {
+            for (let z = 0; z < this._height; z += cellSize) {
+                const height = this._pixelAt(x + cellSize / 2, z + cellSize / 2);
+                const cellY = Math.ceil(maxY * height) || 1;
+
+                for (let cy = 0; cy < cellY; cy++) {
+                    cells.push([cellX, cy, cellZ]);
+                }
+                cellZ++;
+            }
+            cellX++;
+            cellZ = -cellsHalfHeight;
+        }
+
+        return cells;
+    }
+
     voxelize(resolution) {
         let cells = [];
         const cellSize = Math.ceil(255 / resolution);
