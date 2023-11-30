@@ -7,9 +7,9 @@ import {
 } from 'three';
 import VoxelMesh from './voxelMesh';
 
-function makePlane(size, segments) {
+function makePlane(width, height, segments) {
     const plane = new Mesh(
-        new PlaneGeometry(size, size, segments, segments),
+        new PlaneGeometry(width, height, segments, segments),
         new MeshStandardMaterial({ color: 0xbce791 })
     );
     plane.rotateX(-Math.PI / 2);

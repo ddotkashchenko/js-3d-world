@@ -61,10 +61,10 @@ export default class Builder {
             imgUrl: './iceland_heightmap.png',
         });
 
-        // const plane = makePlane(1000, 500);
+        // const plane = makePlane(heightMap._width / 4, heightMap._height / 4, 300);
         // plane.name = 'terrain';
 
-        // heightMap.updatePlane(plane.geometry, 1700, { strenth: 70 });
+        // heightMap.updatePlane(plane.geometry, 500, { strenth: 70 });
         // this._scene.add(plane);
 
         const makeTerrain = (size, res, position) => {
@@ -80,10 +80,10 @@ export default class Builder {
             this._scene.add(terrain2.mesh);
         };
 
-        makeTerrain(4, 16, new THREE.Vector3());
-        makeTerrain(2, 32, new THREE.Vector3().setComponent(1, -50));
-        makeTerrain(1, 64, new THREE.Vector3().setComponent(1, -100));
-        makeTerrain(0.5, 128, new THREE.Vector3().setComponent(1, -150))
+        // makeTerrain(4, 16, new THREE.Vector3());
+        // makeTerrain(2, 32, new THREE.Vector3().setComponent(1, -50));
+        // makeTerrain(1, 64, new THREE.Vector3().setComponent(1, -100));
+        makeTerrain(0.5, 128, new THREE.Vector3());//.setComponent(1, -150))
 
         const cube = makeCube(2);
         cube.name = 'cube';

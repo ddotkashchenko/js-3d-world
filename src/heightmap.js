@@ -39,7 +39,7 @@ class Heightmap {
 
         for (let x = 0; x < this._width; x += cellSize) {
             for (let z = 0; z < this._height; z += cellSize) {
-                const height = this._pixelAt(x + cellSize / 2, z + cellSize / 2);
+                const height = this._pixelAt(x, z);//x + (cellSize / 2), z + (cellSize / 2));
                 const cellY = Math.ceil(maxY * height) || 1;
 
                 for (let cy = 0; cy < cellY; cy++) {

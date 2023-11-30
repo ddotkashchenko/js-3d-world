@@ -15,12 +15,6 @@ export default class VoxelMesh {
     constructor(options) {
 
         this._options = { size: 1, position: new Vector3(), ...options };
-
-        // this._position = options.position;
-        // this._size = options.size;
-        // this._name = options.name;
-        // this._material = options.material;
-
         this._initMesh();
 
         Object.defineProperty(this, 'mesh', {
