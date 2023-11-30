@@ -46,8 +46,9 @@ export default class VoxelMesh {
         this.#mesh = mesh;
     } 
 
-    _construct(cells) {
+    async _construct(cells) {
         const verticesGrouped = [];
+        const indices = [];
         const verticesLookup = {};
 
         const offsetVertex =
@@ -127,50 +128,53 @@ export default class VoxelMesh {
                 ([vx, vy, vz]) => cx === vx && cy === vy && cz - 1 === vz
             );
 
-        let indices = cells
-            .map((cell) => {
-                const cellWithSize = cell.map(c => c * 2 * this._options.size);
-                
-                const res = [
-                ...(isBoundaryTop(cell)
-                    ? top(offsetVertex(cellWithSize))
-                    : []),
-                ...(isBoundaryBottom(cell)
-                    ? bottom(offsetVertex(cellWithSize))
-                    : []),
-                ...(isBoundaryLeft(cell)
-                    ? left(offsetVertex(cellWithSize))
-                    : []),
-                ...(isBoundaryRight(cell)
-                    ? right(offsetVertex(cellWithSize))
-                    : []),
-                ...(isBoundaryFront(cell)
-                    ? front(offsetVertex(cellWithSize))
-                    : []),
-                ...(isBoundaryBack(cell)
-                    ? back(offsetVertex(cellWithSize))
-                    : []),
-                ];
+        let cellTasks = cells
+            .map((cell) => new Promise((resolve) => 
+                setTimeout(() => {
+                    const cellWithSize = cell.map(c => c * 2 * this._options.size);
+                    const res = [
+                    ...(isBoundaryTop(cell)
+                        ? top(offsetVertex(cellWithSize))
+                        : []),
+                    ...(isBoundaryBottom(cell)
+                        ? bottom(offsetVertex(cellWithSize))
+                        : []),
+                    ...(isBoundaryLeft(cell)
+                        ? left(offsetVertex(cellWithSize))
+                        : []),
+                    ...(isBoundaryRight(cell)
+                        ? right(offsetVertex(cellWithSize))
+                        : []),
+                    ...(isBoundaryFront(cell)
+                        ? front(offsetVertex(cellWithSize))
+                        : []),
+                    ...(isBoundaryBack(cell)
+                        ? back(offsetVertex(cellWithSize))
+                        : []),
+                    ];
+                    resolve(res);
+                }, 0)
+            ));
 
-                return res;
-            })
-            .flat();
+        for(const task of cellTasks) {
+            indices.push(await task);
+        }
 
         return {
             vertices: verticesGrouped.flat(),
-            indices,
+            indices: indices.flat(),
         };
     }
 
     construct(cells) {
-        const voxels = this._construct(cells);
-
-        this.#mesh.geometry.setAttribute(
-            'position',
-            new BufferAttribute(new Float32Array(voxels.vertices), 3)
-            );
-            
-        this.#mesh.geometry.setIndex(voxels.indices);
-        this.#mesh.geometry.computeVertexNormals();            
+        this._construct(cells).then((voxels) => {
+            this.#mesh.geometry.setAttribute(
+                'position',
+                new BufferAttribute(new Float32Array(voxels.vertices), 3)
+                );
+                
+            this.#mesh.geometry.setIndex(voxels.indices);
+            this.#mesh.geometry.computeVertexNormals();
+        });         
     }
 }

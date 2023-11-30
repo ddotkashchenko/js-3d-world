@@ -83,19 +83,18 @@ export default class Builder {
         makeTerrain(4, 16, new THREE.Vector3());
         makeTerrain(2, 32, new THREE.Vector3().setComponent(1, -50));
         makeTerrain(1, 64, new THREE.Vector3().setComponent(1, -100));
+        makeTerrain(0.5, 128, new THREE.Vector3().setComponent(1, -150))
 
         const cube = makeCube(2);
         cube.name = 'cube';
-        cube.position.set(0, 60, 0);
+        cube.position.set(0, 20, 0);
         this._scene.add(cube);
 
         this._scene.add(
             makePyramid(4, 1, new THREE.Vector3(-10, 50, 0), {wireframe: false}),
-            // makePyramid(4, 4, new THREE.Vector3(20, 50, 0), {wireframe: false})
         );
 
         this._controller = new Controller(this._scene, {
-            // terrain: plane,
         });
 
         this._next.push((t) => this._controller.step(t));
@@ -110,7 +109,7 @@ export default class Builder {
                 move: (obj, vec) => {
                     this._controller.move(obj, vec);
                 },
-                // activeObjectName: 'pyramid',
+                activeObjectName: 'voxelTerrain',
                 excludeSelecting: ['terrain'],
             }
         );
