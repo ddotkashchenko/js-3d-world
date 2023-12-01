@@ -103,13 +103,13 @@ export default class Builder {
             new THREE.Vector3()
         );
 
-        heightmap = icelandBitmap.load(16);
-        makeTerrain(
-            128,
-            32,
-            heightmap,
-            new THREE.Vector3().setComponent(0, 130)
-        );
+        // heightmap = icelandBitmap.load(16);
+        // makeTerrain(
+        //     128,
+        //     32,
+        //     heightmap,
+        //     new THREE.Vector3().setComponent(0, 130)
+        // );
 
         const cube = makeCube(icelandBitmap.width / 128 / 32);
         cube.name = 'cube';

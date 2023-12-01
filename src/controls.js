@@ -23,9 +23,11 @@ export default class Controls {
             this._activeObject = this._scene.getObjectByName(
                 this._options.activeObjectName
             );
+
+            this._focused = false
         }
 
-        if (this._activeObject) {
+        if (this._activeObject && !this._focused) {
             this.focusActiveObject();
         }
     }
@@ -38,6 +40,7 @@ export default class Controls {
             this._orbitControls.target.set(x, y, z);
 
             this._orbitControls.update();
+            this._focused = true;
         }
     }
 
