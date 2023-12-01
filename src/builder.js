@@ -111,16 +111,16 @@ export default class Builder {
         //     new THREE.Vector3().setComponent(0, 130)
         // );
 
-        const cube = makeCube(icelandBitmap.width / 128 / 32);
+        const cube = makeCube(2);
         cube.name = 'cube';
         cube.position.set(0, 50, 0);
         this._scene.add(cube);
 
-        // this._scene.add(
-        //     makePyramid(4, 1, new THREE.Vector3(-10, 50, 0), {
-        //         wireframe: false,
-        //     })
-        // );
+        this._scene.add(
+            makePyramid(4, 1, new THREE.Vector3(-10, 50, 0), {
+                wireframe: false,
+            })
+        );
 
         this._controller = new Controller(this._scene, {});
 

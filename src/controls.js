@@ -65,12 +65,12 @@ export default class Controls {
 
             const intersects = this._rayCaster
                 .intersectObjects(this._scene.children)
-                .filter(
-                    (i) =>
-                        !this._options.excludeSelecting.some(
-                            (e) => i.object.name === e
-                        )
-                );
+                // .filter(
+                //     (i) =>
+                //         !this._options.excludeSelecting.some(
+                //             (e) => i.object.name === e
+                //         )
+                // );
 
             if (intersects.length) {
                 const newPos = this._orbitControls.target
@@ -78,6 +78,7 @@ export default class Controls {
                     .add(new THREE.Vector3(10, 10, 0));
                 this._camera.position.set(newPos.x, newPos.y, newPos.y);
                 this._activeObject = intersects[0].object;
+                this._focused = false;
             }
         });
 
