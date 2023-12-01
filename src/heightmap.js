@@ -6,6 +6,13 @@ class Heightmap {
         this._width = options.width;
         this._height = options.height;
         this._heightData = options.heightData;
+
+        Object.defineProperty(this, 'width', {
+            value: this._width
+        });
+        Object.defineProperty(this, 'height', {
+            value: this._height
+        });
     }
 
     updatePlane(geometry, size, options) {

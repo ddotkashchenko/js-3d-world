@@ -61,12 +61,38 @@ export default class Builder {
             imgUrl: './iceland_heightmap.png',
         });
 
-        // const plane = makePlane(heightMap._width / 4, heightMap._height / 4, 300);
-        // plane.name = 'terrain';
+        new THREE.ImageBitmapLoader()
+            .load('./iceland_heightmap.png', (bitmap) => {
+                const pixelSize = 64;
 
-        // heightMap.updatePlane(plane.geometry, 500, { strenth: 70 });
-        // this._scene.add(plane);
+                const canvas = document.createElement('canvas');
+                canvas.width = bitmap.width; canvas.height = bitmap.height;
 
+                const ctx = canvas.getContext('2d');
+                ctx.scale(1 / pixelSize, 1 / pixelSize);
+                ctx.drawImage(bitmap, 0, 0);
+                ctx.globalCompositeOperation = 'copy';
+                ctx.imageSmoothingEnabled = false;
+                ctx.setTransform(pixelSize, 0, 0, pixelSize, 0, 0);
+                ctx.drawImage(canvas, 0, 0);
+
+                const imageData = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+
+                createImageBitmap(imageData).then((downresBitmap) => {
+                    const plane = new THREE.Mesh(
+                        new THREE.PlaneGeometry(128, 128 / (heightMap.width / heightMap.height)),
+                        new THREE.MeshStandardMaterial({
+                            map: new THREE.CanvasTexture(downresBitmap)
+                        })
+                    );    
+                    plane.position.set(0, 0, 100);
+                    plane.rotateX(-Math.PI / 2);
+                    plane.name = 'heightmap';
+                    this._scene.add(plane);
+                });
+            });
+        
+        
         const makeTerrain = (size, res, position) => {
             const terrain2 = new VoxelMesh({
                 size,
@@ -81,13 +107,13 @@ export default class Builder {
         };
 
         // makeTerrain(4, 16, new THREE.Vector3());
-        // makeTerrain(2, 32, new THREE.Vector3().setComponent(1, -50));
-        // makeTerrain(1, 64, new THREE.Vector3().setComponent(1, -100));
-        makeTerrain(0.5, 128, new THREE.Vector3());//.setComponent(1, -150))
+        // makeTerrain(2, 32, new THREE.Vector3())//.setComponent(1, -50));
+        makeTerrain(1, 64, new THREE.Vector3()); //.setComponent(1, -100));
+        // makeTerrain(0.5, 128, new THREE.Vector3());//.setComponent(1, -150))
 
         const cube = makeCube(2);
         cube.name = 'cube';
-        cube.position.set(0, 20, 0);
+        cube.position.set(0, 50, 0);
         this._scene.add(cube);
 
         this._scene.add(
@@ -109,7 +135,7 @@ export default class Builder {
                 move: (obj, vec) => {
                     this._controller.move(obj, vec);
                 },
-                activeObjectName: 'voxelTerrain',
+                activeObjectName: 'heightmap',
                 excludeSelecting: ['terrain'],
             }
         );
