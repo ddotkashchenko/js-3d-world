@@ -2,156 +2,113 @@ import * as THREE from 'three';
 import { Math2 } from './math2';
 
 class Heightmap {
+    #bitmap;
+    #canvas;
+
     constructor(options) {
-        this._width = options.width;
-        this._height = options.height;
-        this._heightData = options.heightData;
+        this.#bitmap = options.bitmap;
+        this.#canvas = document.createElement('canvas');
+        this.#canvas.width = this.#bitmap.width; 
+        this.#canvas.height = this.#bitmap.height;
 
         Object.defineProperty(this, 'width', {
-            value: this._width
+            value: this.#bitmap.width
         });
         Object.defineProperty(this, 'height', {
-            value: this._height
+            value: this.#bitmap.height
+        });
+        Object.defineProperty(this, 'aspectRatio', {
+            value: this.#bitmap.width / this.#bitmap.height
         });
     }
 
-    updatePlane(geometry, size, options) {
-        const positionAttribute = geometry.getAttribute('position');
+    load(pixelSize = 1) {
+        const ctx = this.#canvas.getContext('2d');
+        ctx.scale(1 / pixelSize, 1 / pixelSize);
+        ctx.drawImage(this.#bitmap, 0, 0);
+        ctx.globalCompositeOperation = 'copy';
+        ctx.imageSmoothingEnabled = false;
+        ctx.setTransform(pixelSize, 0, 0, pixelSize, 0, 0);
+        ctx.drawImage(this.#canvas, 0, 0);
+        
+        const {width, height} = this.#bitmap;
+        const imageData = ctx.getImageData(0, 0, width, height);
+        
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.imageSmoothingEnabled = true;
 
-        const vertex = new THREE.Vector3();
-        for (let i = 0; i < positionAttribute.count; i++) {
-            vertex.fromBufferAttribute(positionAttribute, i);
-
-            const xf = (vertex.x + size * 0.5) / size;
-            const yf = (vertex.y + size * 0.5) / size;
-            const height = this._get(xf, yf) || 0;
-
-            positionAttribute.setZ(i, height * options.strenth);
+        const pixelAt = (x, y) => {
+            const pos = (x + this.width * y) * 4;
+            return imageData.data[pos] / 255.0;
         }
+        return {
 
-        positionAttribute.needsUpdate = true;
-        geometry.computeVertexNormals();
-    }
+            width: this.#bitmap.width,
+            pixelSize,
 
-    voxelize2(resolution, maxY) {
-        let cells = [];
-        const aspectRatio = this._width / this._height;
-        const cellSize = Math.ceil(this._width / resolution);
+            downresBitmapAsync: () => createImageBitmap(imageData, {imageOrientation: 'flipY'}),
+
+            voxelize2: (maxY) => {
+                let cells = [];
+                const aspectRatio = this.width / this.height;
+                const cellSize = pixelSize; //Math.ceil(this.width / pixelSize);
+                
+                const cellsHalfWidth = Math.floor((this.width / pixelSize) / 2);
+                const cellsHalfHeight = Math.floor(cellsHalfWidth / aspectRatio);
         
-        const cellsHalfWidth = Math.floor(resolution / 2);
-        const cellsHalfHeight = Math.floor(cellsHalfWidth / aspectRatio);
-
-        let cellX = -cellsHalfWidth;
-        let cellZ = -cellsHalfHeight;
-
-        for (let x = 0; x < this._width; x += cellSize) {
-            for (let z = 0; z < this._height; z += cellSize) {
-                const height = this._pixelAt(x, z);//x + (cellSize / 2), z + (cellSize / 2));
-                const cellY = Math.ceil(maxY * height) || 1;
-
-                for (let cy = 0; cy < cellY; cy++) {
-                    cells.push([cellX, cy, cellZ]);
-                }
-                cellZ++;
-            }
-            cellX++;
-            cellZ = -cellsHalfHeight;
-        }
-
-        return cells;
-    }
-
-    voxelize(resolution) {
-        let cells = [];
-        const cellSize = Math.ceil(255 / resolution);
+                let cellX = -cellsHalfWidth;
+                let cellZ = -cellsHalfHeight;
         
-        const stepXY = 1;
-
-        const cellsHalfWidth = Math.floor(this._width / (cellSize * 2)) * stepXY;
-        const cellsHalfHeight = Math.floor(this._height / (cellSize * 2)) * stepXY;
+                for (let x = pixelSize / 2; x < this.width; x += cellSize) {
+                    for (let z = pixelSize / 2; z < this.height; z += cellSize) {
+                        const height = pixelAt(x, z);
+                        const cellY = Math.ceil(maxY * height) || 1;
         
-        let cellX = -cellsHalfWidth;
-        let cellZ = -cellsHalfHeight;
-
-        for (let x = 0; x < this._width; x += cellSize) {
-            for (let z = 0; z < this._height; z += cellSize) {
-
-                const height = this._pixelAt(x + cellSize / 2, z + cellSize / 2) || 0;
-                const heightCells = Math.ceil(height * 255 / cellSize) + 1;
-
-                cells = [
-                    ...cells,
-                    ...[...Array(heightCells).keys()].map((cellY) => {
-                        let res = [];
-                        for(let repeatX = 0; repeatX < stepXY; repeatX++)
-                            for(let repeatZ = 0; repeatZ < stepXY; repeatZ++) {
-                               res.push([cellX + repeatX, cellY, cellZ + repeatZ]); 
+                        for (let cy = 0; cy < cellY; cy++) {
+                            cells.push([cellX, cy, cellZ]);
                         }
-                        return res;
-                    }).flat()
-                ];
-                cellZ+= stepXY;
-            }
-            cellX+= stepXY;
-            cellZ = -cellsHalfHeight;
+                        cellZ++;
+                    }
+                    cellX++;
+                    cellZ = -cellsHalfHeight;
+                }
+        
+                return cells;
+            },
+        
         }
-
-        return cells;
     }
 
-    _pixelAt(x, y) {
-        const pos = (x + this._width * y) * 4;
-        return this._heightData[pos] / 255.0;
-    }
+    // updatePlane(geometry, size, options) {
+    //     const positionAttribute = geometry.getAttribute('position');
 
-    _get(xf, yf) {
-        const w = this._width - 1;
-        const h = this._height - 1;
+    //     const vertex = new THREE.Vector3();
+    //     for (let i = 0; i < positionAttribute.count; i++) {
+    //         vertex.fromBufferAttribute(positionAttribute, i);
 
-        const x1 = Math.floor(xf * w);
-        const y1 = Math.floor(yf * h);
-        const x2 = Math2.clamp(x1 + 1, 0, w);
-        const y2 = Math2.clamp(y1 + 1, 0, h);
+    //         const xf = (vertex.x + size * 0.5) / size;
+    //         const yf = (vertex.y + size * 0.5) / size;
+    //         const height = this._get(xf, yf) || 0;
 
-        const xp = xf * w - x1;
-        const yp = yf * h - y1;
+    //         positionAttribute.setZ(i, height * options.strenth);
+    //     }
 
-        const p11 = this._pixelAt(x1, y1);
-        const p12 = this._pixelAt(x1, y2);
-        const p21 = this._pixelAt(x2, y1);
-        const p22 = this._pixelAt(x2, y2);
+    //     positionAttribute.needsUpdate = true;
+    //     geometry.computeVertexNormals();
+    // }
 
-        const px1 = Math2.lerp(xp, p11, p21);
-        const px2 = Math2.lerp(xp, p12, p22);
-
-        return Math2.lerp(yp, px1, px2);
-    }
+    
 }
 
-const fromImage = async ({ imgUrl }) => {
+const fromImage = async ({ imgUrl, options }) => {
     return await new Promise((resolve) => {
         new THREE.ImageBitmapLoader()
-            .setOptions({ imageOrientation: 'flipY' })
-            .load(imgUrl, (img) => {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-
-                const context = canvas.getContext('2d');
-                context.drawImage(img, 0, 0);
-
-                const imageData = context.getImageData(
-                    0,
-                    0,
-                    img.width,
-                    img.height
-                );
-
+            .setOptions({ imageOrientation: 'flipY', ...options })
+            .load(imgUrl, (bitmap) => {
                 resolve(
                     new Heightmap({
-                        width: img.width,
-                        height: img.height,
-                        heightData: imageData.data,
+                        bitmap
                     })
                 );
             });

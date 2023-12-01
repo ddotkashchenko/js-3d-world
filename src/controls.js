@@ -43,14 +43,16 @@ export default class Controls {
 
     bind() {
         let drag = false;
-        this._domElement.addEventListener('mousedown', () => {
-            drag = false;
+        this._domElement.addEventListener('mousedown', (e) => {
+            if(e.buttons == 1)
+                drag = false;
         });
-        this._domElement.addEventListener('mousemove', () => {
-            drag = true;
+        this._domElement.addEventListener('mousemove', (e) => {
+            if(e.buttons == 1)
+                drag = true;
         });
         this._domElement.addEventListener('click', (e) => {
-            if (drag) return;
+            if (drag || e.buttons == 1) return;
             const pointer = new THREE.Vector2(
                 (e.clientX / window.innerWidth) * 2 - 1,
                 -(e.clientY / window.innerHeight) * 2 + 1

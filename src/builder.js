@@ -26,7 +26,7 @@ export default class Builder {
     addPerspectiveCamera() {
         const fov = 60;
         const aspect = 1920 / 1080;
-        const near = 1.0;
+        const near = 0.01;
         const far = 1000.0;
         this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
         this._camera.position.set(0, 70, 30);
@@ -57,71 +57,72 @@ export default class Builder {
     }
 
     async addScene() {
-        const heightMap = await fromImage({
+        const icelandBitmap = await fromImage({
             imgUrl: './iceland_heightmap.png',
         });
 
-        new THREE.ImageBitmapLoader()
-            .load('./iceland_heightmap.png', (bitmap) => {
-                const pixelSize = 64;
+        let heightmap = icelandBitmap.load(16);
 
-                const canvas = document.createElement('canvas');
-                canvas.width = bitmap.width; canvas.height = bitmap.height;
+        const plane = makePlane({
+            width: 128,
+            height: 128 / icelandBitmap.aspectRatio,
+            material: {
+                map: new THREE.CanvasTexture(
+                    await heightmap.downresBitmapAsync()
+                ),
+            },
+        });
+        plane.position.set(0, 0, 130 / icelandBitmap.aspectRatio);
+        plane.name = 'heightmap';
+        this._scene.add(plane);
 
-                const ctx = canvas.getContext('2d');
-                ctx.scale(1 / pixelSize, 1 / pixelSize);
-                ctx.drawImage(bitmap, 0, 0);
-                ctx.globalCompositeOperation = 'copy';
-                ctx.imageSmoothingEnabled = false;
-                ctx.setTransform(pixelSize, 0, 0, pixelSize, 0, 0);
-                ctx.drawImage(canvas, 0, 0);
-
-                const imageData = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
-
-                createImageBitmap(imageData).then((downresBitmap) => {
-                    const plane = new THREE.Mesh(
-                        new THREE.PlaneGeometry(128, 128 / (heightMap.width / heightMap.height)),
-                        new THREE.MeshStandardMaterial({
-                            map: new THREE.CanvasTexture(downresBitmap)
-                        })
-                    );    
-                    plane.position.set(0, 0, 100);
-                    plane.rotateX(-Math.PI / 2);
-                    plane.name = 'heightmap';
-                    this._scene.add(plane);
-                });
-            });
-        
-        
-        const makeTerrain = (size, res, position) => {
+        const makeTerrain = (width, heightY, heightmap, position) => {
+            const size = width / (heightmap.width / (heightmap.pixelSize / 2))
             const terrain2 = new VoxelMesh({
                 size,
                 name: 'voxelTerrain',
                 position,
-                material: {color: 0xbce791, wireframe: false},
+                material: { color: 0xbce791, wireframe: false },
             });
 
-            const cells2 = heightMap.voxelize2(res, res / 4);
-            terrain2.construct(cells2)
+            const cells2 = heightmap.voxelize2(heightY);
+            terrain2.construct(cells2);
             this._scene.add(terrain2.mesh);
         };
 
-        // makeTerrain(4, 16, new THREE.Vector3());
-        // makeTerrain(2, 32, new THREE.Vector3())//.setComponent(1, -50));
-        makeTerrain(1, 64, new THREE.Vector3()); //.setComponent(1, -100));
-        // makeTerrain(0.5, 128, new THREE.Vector3());//.setComponent(1, -150))
+        heightmap = icelandBitmap.load(64);
+        makeTerrain(
+            128, 8, heightmap, new THREE.Vector3().setComponent(0, -130)
+        );
 
-        const cube = makeCube(2);
+        heightmap = icelandBitmap.load(32);
+        makeTerrain(
+            128,
+            16,
+            heightmap,
+            new THREE.Vector3()
+        );
+
+        heightmap = icelandBitmap.load(16);
+        makeTerrain(
+            128,
+            32,
+            heightmap,
+            new THREE.Vector3().setComponent(0, 130)
+        );
+
+        const cube = makeCube(icelandBitmap.width / 128 / 32);
         cube.name = 'cube';
         cube.position.set(0, 50, 0);
         this._scene.add(cube);
 
-        this._scene.add(
-            makePyramid(4, 1, new THREE.Vector3(-10, 50, 0), {wireframe: false}),
-        );
+        // this._scene.add(
+        //     makePyramid(4, 1, new THREE.Vector3(-10, 50, 0), {
+        //         wireframe: false,
+        //     })
+        // );
 
-        this._controller = new Controller(this._scene, {
-        });
+        this._controller = new Controller(this._scene, {});
 
         this._next.push((t) => this._controller.step(t));
     }
@@ -135,7 +136,7 @@ export default class Builder {
                 move: (obj, vec) => {
                     this._controller.move(obj, vec);
                 },
-                activeObjectName: 'heightmap',
+                activeObjectName: 'cube',
                 excludeSelecting: ['terrain'],
             }
         );

@@ -7,14 +7,22 @@ import {
 } from 'three';
 import VoxelMesh from './voxelMesh';
 
-function makePlane(width, height, segments) {
+function makePlane(options) {
+    const { width, height, segments, material, shadow } = {
+        width: 10,
+        height: 10,
+        segments: 1,
+        material: { color: 0xbce791 },
+        shadow: false,
+        ...options,
+    };
     const plane = new Mesh(
         new PlaneGeometry(width, height, segments, segments),
-        new MeshStandardMaterial({ color: 0xbce791 })
+        new MeshStandardMaterial(material)
     );
     plane.rotateX(-Math.PI / 2);
-    plane.castShadow = true;
-    plane.receiveShadow = true;
+    plane.castShadow = shadow;
+    plane.receiveShadow = shadow;
 
     return plane;
 }
@@ -22,7 +30,7 @@ function makePlane(width, height, segments) {
 function makeCube(size) {
     const cube = new Mesh(
         new BoxGeometry(size, size, size, 1, 1, 1),
-        new MeshStandardMaterial({ color: 0xff5555 })
+        new MeshStandardMaterial({ color: 0xff5555, wireframe: false })
     );
 
     cube.castShadow = true;
@@ -49,7 +57,7 @@ function makePyramid(height, size, position, material) {
         size: size,
         name: 'pyramid',
         position,
-        material
+        material,
     });
 
     pyramid.construct(pyramidShape);

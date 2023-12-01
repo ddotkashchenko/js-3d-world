@@ -36,6 +36,7 @@ export default class VoxelMesh {
         mesh.position.set(this._options.position.x, this._options.position.y, this._options.position.z);
         mesh.castShadow = true;
         mesh.receiveShadow = true;
+        mesh.frustumCulled = false;
 
         this.#mesh = mesh;
     } 
