@@ -6,7 +6,7 @@ import {
     Vector3,
 } from 'three';
 
-export default class VoxelMesh {
+export class VoxelMesh {
     #mesh;
     #options;
 
@@ -175,14 +175,6 @@ export default class VoxelMesh {
         });
     }
 
-    // prettier-ignore
-    #octreeOrder = [
-        [-1, -1, -1],   [1, -1, -1], 
-        [-1, -1, 1],    [1, -1, 1],
-        [-1, 1, -1],    [1, 1, -1], 
-        [-1, 1, 1],     [1, 1, 1]
-    ];
-
     #octree(cell, level, cellsSide, [ox, oy, oz] = [0, 0, 0]) {
         if (Math.pow(2, level) == cellsSide) {
             return [[ox, oy, oz]];
@@ -191,7 +183,7 @@ export default class VoxelMesh {
         const res = [];
         cell.cells.forEach((c, i) => {
             if (c) {
-                const [ordX, ordY, ordZ] = this.#octreeOrder[i];
+                const [ordX, ordY, ordZ] = octreeOrder[i];
                 const offset = cellsSide / Math.pow(2, level + 2);
                 res.push(
                     this.#octree(
@@ -223,3 +215,10 @@ export default class VoxelMesh {
         });
     }
 }
+
+export const octreeOrder = [
+    [-1, -1, -1],   [1, -1, -1], 
+    [-1, -1, 1],    [1, -1, 1],
+    [-1, 1, -1],    [1, 1, -1], 
+    [-1, 1, 1],     [1, 1, 1]
+];

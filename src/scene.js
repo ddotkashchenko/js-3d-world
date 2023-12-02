@@ -5,7 +5,7 @@ import {
     Mesh,
     Vector3,
 } from 'three';
-import VoxelMesh from './voxelMesh';
+import { VoxelMesh, octreeOrder } from './voxelMesh';
 
 function makePlane(options) {
     const { width, height, segments, material, shadow } = {
@@ -65,6 +65,45 @@ function makePyramid(height, size, position, material) {
     return pyramid.mesh;
 }
 
+function makeSphere(radius, level, maxLevel, [offsetX, offsetY, offsetZ]) {
+    if (level == maxLevel) {
+        return 1;
+    }
+
+    return {
+        cells: octreeOrder.map(([signX, signY, signZ]) => {
+            const pow = Math.pow(2, level);
+            const v = new Vector3(
+                offsetX + signX / pow,
+                offsetY + signY / pow,
+                offsetZ + signZ / pow
+            );
+
+            return v.length() >= radius + (radius * 0.7 / pow)
+                ? null
+                : makeSphere(radius, level + 1, maxLevel, v);
+        }),
+    };
+}
+
+function makeOctreeSphere() {
+    const res = 6;
+
+    const shape = makeSphere(1.5, 0, res, [0, 0, 0]);
+
+    const sphere = new VoxelMesh({
+        size: 64,
+        name: 'octree-pyramid',
+        material: {
+            color: 0x44bbbb,
+            wireframe: false,
+        },
+    });
+
+    sphere.constructOctree(shape, res - 1);
+    return sphere.mesh;
+}
+
 function makeOctreePyramid(position) {
     // const shape = {
     //     cells: [1, 1, 1, 1, 1, 1, 1, null], //.map(c => Boolean(c))
@@ -99,7 +138,7 @@ function makeOctreePyramid(position) {
     };
 
     shape = {
-        cells: Array(8).fill(shape)
+        cells: Array(8).fill(shape),
     };
 
     const pyramid = new VoxelMesh({
@@ -116,4 +155,10 @@ function makeOctreePyramid(position) {
     return pyramid.mesh;
 }
 
-export { makePlane, makeCube, makePyramid, makeOctreePyramid };
+export {
+    makePlane,
+    makeCube,
+    makePyramid,
+    makeOctreePyramid,
+    makeOctreeSphere,
+};

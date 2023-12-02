@@ -3,9 +3,7 @@ import World from './world';
 import Controller from './controller';
 import Controls from './controls';
 // import VoxelTerrain from './voxelTerrain';
-import { fromImage } from './heightmap';
-import { makeCube, makeOctreePyramid, makePlane, makePyramid } from './scene';
-import VoxelMesh from './voxelMesh';
+import { makeCube, makeOctreePyramid, makeOctreeSphere, makePlane, makePyramid } from './scene';
 
 export default class Builder {
     constructor() {
@@ -120,9 +118,10 @@ export default class Builder {
             })
         );
 
-        this._scene.add(
-            makeOctreePyramid(new THREE.Vector3(0, 50, 0))
-        )
+        this._scene.add(makeOctreeSphere());
+        // this._scene.add(
+        //     makeOctreePyramid(new THREE.Vector3(0, 50, 0))
+        // )
 
         this._controller = new Controller(this._scene, {});
 
