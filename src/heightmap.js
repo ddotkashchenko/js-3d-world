@@ -45,6 +45,7 @@ class Heightmap {
         return {
 
             width: this.#bitmap.width,
+            height: this.#bitmap.height,
             pixelSize,
 
             downresBitmapAsync: () => createImageBitmap(imageData, {imageOrientation: 'flipY'}),

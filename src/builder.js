@@ -4,7 +4,7 @@ import Controller from './controller';
 import Controls from './controls';
 import { VoxelMesh } from './voxelMesh';
 import {Heightmap, fromImage} from './heightmap';
-import { makeCube, makeOctreePyramid, makeOctreeSphere, makePlane } from './scene';
+import { makeCube, makeOctreePyramid, makeOctreeSphere, makePlane, makeWater } from './scene';
 
 export default class Builder {
     constructor() {
@@ -115,6 +115,9 @@ export default class Builder {
             heightmap,
             new THREE.Vector3()//.setComponent(2, -130)
         );
+
+        this._scene.add(
+            makeWater(heightmap.width, heightmap.height, 4.2));
 
         const cube = makeCube(2);
         cube.name = 'cube';

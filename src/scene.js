@@ -65,6 +65,20 @@ function makePyramid(height, size, position, material) {
     return pyramid.mesh;
 }
 
+function makeWater(width, height, heightLevel, material) {
+    const mesh = new Mesh(
+        new PlaneGeometry(width, height, 1, 1),
+        new MeshStandardMaterial({
+            color: 0x1da2d8,
+            ...material
+        })
+    );
+    mesh.rotateX(-Math.PI / 2);
+    mesh.position.setComponent(1, heightLevel);
+
+    return mesh;
+}
+
 function makeSphere(radius, level, maxLevel, [offsetX, offsetY, offsetZ]) {
     if (level == maxLevel) {
         return 1;
@@ -145,4 +159,5 @@ export {
     makePyramid,
     makeOctreePyramid,
     makeOctreeSphere,
+    makeWater
 };
