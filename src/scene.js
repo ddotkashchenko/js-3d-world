@@ -70,18 +70,36 @@ function makeOctreePyramid(position) {
     //     cells: [1, 1, 1, 1, 1, 1, 1, null], //.map(c => Boolean(c))
     // };
 
-    const shape = {
+    // const shape = {
+    //     cells: [
+    //         {cells: [1, 1, 1, 1, 1, 1, 1, null]},
+    //         {cells: [1, 1, 1, 1, 1, 1, 1, null]},
+    //         {cells: [1, 1, 1, 1, 1, 1, 1, null]},
+    //         {cells: [1, 1, 1, 1, 1, 1, 1, null]},
+    //         {cells: [1, 1, 1, 1, 1, 1, 1, null]},
+    //         {cells: [1, 1, 1, 1, 1, 1, 1, null]},
+    //         {cells: [1, 1, 1, 1, 1, 1, 1, null]},
+    //         null,
+    //         null
+    //     ],
+    // };
+
+    let shape = {
         cells: [
-            {cells: [1, 1, 1, 1, 1, 1, 1, null]},
-            {cells: [1, 1, 1, 1, 1, 1, 1, null]},
-            {cells: [1, 1, 1, 1, 1, 1, 1, null]},
-            {cells: [1, 1, 1, 1, 1, 1, 1, null]},
-            {cells: [1, 1, 1, 1, 1, 1, 1, null]},
-            {cells: [1, 1, 1, 1, 1, 1, 1, null]},
-            {cells: [1, 1, 1, 1, 1, 1, 1, null]},
-            null,
-            null
+            { cells: [1, 1, 1, 1, null, null, null, 1] },
+            { cells: [1, 1, 1, 1, null, null, 1, null] },
+            { cells: [1, 1, 1, 1, null, 1, null, null] },
+            { cells: [1, 1, 1, 1, 1, null, 1, null] },
+
+            { cells: [null, null, null, 1, null, null, null, null] },
+            { cells: [null, null, 1, null, null, null, null] },
+            { cells: [null, 1, null, null, null, null, null] },
+            { cells: [1, null, null, null, null, null, null] },
         ],
+    };
+
+    shape = {
+        cells: Array(8).fill(shape)
     };
 
     const pyramid = new VoxelMesh({
@@ -90,11 +108,11 @@ function makeOctreePyramid(position) {
         position,
         material: {
             color: 0x44bbbb,
-            wireframe: false,
+            wireframe: true,
         },
     });
 
-    pyramid.constructOctree(shape, 2);
+    pyramid.constructOctree(shape, 3);
     return pyramid.mesh;
 }
 
