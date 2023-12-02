@@ -86,43 +86,26 @@ function makeSphere(radius, level, maxLevel, [offsetX, offsetY, offsetZ]) {
     };
 }
 
-function makeOctreeSphere() {
+function makeOctreeSphere(position) {
 
-    const res = 6;
+    const res = 8;
 
     const shape = makeSphere(1.66, 0, res, [0, 0, 0]);
 
     const sphere = new VoxelMesh({
-        size: 64,
+        size: 32,
         name: 'octree-pyramid',
+        position,
         material: {
             color: 0x44bbbb,
             wireframe: false,
         },
     });
-
     sphere.constructOctree(shape, res - 1);
     return sphere.mesh;
 }
 
 function makeOctreePyramid(position) {
-    // const shape = {
-    //     cells: [1, 1, 1, 1, 1, 1, 1, null], //.map(c => Boolean(c))
-    // };
-
-    // const shape = {
-    //     cells: [
-    //         {cells: [1, 1, 1, 1, 1, 1, 1, null]},
-    //         {cells: [1, 1, 1, 1, 1, 1, 1, null]},
-    //         {cells: [1, 1, 1, 1, 1, 1, 1, null]},
-    //         {cells: [1, 1, 1, 1, 1, 1, 1, null]},
-    //         {cells: [1, 1, 1, 1, 1, 1, 1, null]},
-    //         {cells: [1, 1, 1, 1, 1, 1, 1, null]},
-    //         {cells: [1, 1, 1, 1, 1, 1, 1, null]},
-    //         null,
-    //         null
-    //     ],
-    // };
 
     let shape = {
         cells: [
@@ -143,12 +126,12 @@ function makeOctreePyramid(position) {
     };
 
     const pyramid = new VoxelMesh({
-        size: 32,
+        size: 16,
         name: 'octree-pyramid',
         position,
         material: {
-            color: 0x44bbbb,
-            wireframe: true,
+            color: 0x22aa22,
+            wireframe: false,
         },
     });
 

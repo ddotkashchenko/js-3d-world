@@ -50,9 +50,9 @@ class Heightmap {
             downresBitmapAsync: () => createImageBitmap(imageData, {imageOrientation: 'flipY'}),
 
             voxelize2: (maxY) => {
-                let cells = [];
+                let cells = {};//[];
                 const aspectRatio = this.width / this.height;
-                const cellSize = pixelSize; //Math.ceil(this.width / pixelSize);
+                const cellSize = pixelSize;
                 
                 const cellsHalfWidth = Math.floor((this.width / pixelSize) / 2);
                 const cellsHalfHeight = Math.floor(cellsHalfWidth / aspectRatio);
@@ -66,7 +66,8 @@ class Heightmap {
                         const cellY = Math.ceil(maxY * height) || 1;
         
                         for (let cy = 0; cy < cellY; cy++) {
-                            cells.push([cellX, cy, cellZ]);
+                            cells[`${cellX}.${cy}.${cellZ}`] = [cellX, cy, cellZ];
+                            // cells.push([cellX, cy, cellZ]);
                         }
                         cellZ++;
                     }
