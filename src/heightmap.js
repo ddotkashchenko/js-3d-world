@@ -23,7 +23,7 @@ class Heightmap {
     }
 
     load(pixelSize = 1) {
-        const ctx = this.#canvas.getContext('2d');
+        const ctx = this.#canvas.getContext('2d');//, {willReadFrequently: true });
         ctx.scale(1 / pixelSize, 1 / pixelSize);
         ctx.drawImage(this.#bitmap, 0, 0);
         ctx.globalCompositeOperation = 'copy';
