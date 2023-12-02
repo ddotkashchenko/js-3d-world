@@ -98,36 +98,18 @@ export class VoxelMesh {
             v(-1, 1, -1), v(1, 1, -1), v(-1, -1, -1)
         ];
 
-        const isBoundaryTop = ([cx, cy, cz]) =>
-            !cells.some(
-                ([vx, vy, vz]) => cx === vx && cy + 1 === vy && cz === vz
-            );
-        const isBoundaryBottom = ([cx, cy, cz]) =>
-            !cells.some(
-                ([vx, vy, vz]) => cx === vx && cy - 1 === vy && cz === vz
-            );
-        const isBoundaryLeft = ([cx, cy, cz]) =>
-            !cells.some(
-                ([vx, vy, vz]) => cx - 1 === vx && cy === vy && cz === vz
-            );
-        const isBoundaryRight = ([cx, cy, cz]) =>
-            !cells.some(
-                ([vx, vy, vz]) => cx + 1 === vx && cy === vy && cz === vz
-            );
-        const isBoundaryFront = ([cx, cy, cz]) =>
-            !cells.some(
-                ([vx, vy, vz]) => cx === vx && cy === vy && cz + 1 === vz
-            );
-        const isBoundaryBack = ([cx, cy, cz]) =>
-            !cells.some(
-                ([vx, vy, vz]) => cx === vx && cy === vy && cz - 1 === vz
-            );
+        const isBoundaryTop = ([cx, cy, cz]) => !cells[`${cx}.${cy + 1}.${cz}`];
+        const isBoundaryBottom = ([cx, cy, cz]) => !cells[`${cx}.${cy - 1}.${cz}`];
+        const isBoundaryLeft = ([cx, cy, cz]) => !cells[`${cx - 1}.${cy}.${cz}`];
+        const isBoundaryRight = ([cx, cy, cz]) => !cells[`${cx + 1}.${cy}.${cz}`];
+        const isBoundaryFront = ([cx, cy, cz]) => !cells[`${cx}.${cy}.${cz + 1}`];
+        const isBoundaryBack = ([cx, cy, cz]) => !cells[`${cx}.${cy}.${cz - 1}`];
 
-        let cellTasks = cells.map(
+        let cellTasks = Object.values(cells).map(
             (cell) =>
                 new Promise((resolve) =>
                     setTimeout(() => {
-                        const cellWithSize = cell.map((c) => c * 2 * size); //this.#options.size);
+                        const cellWithSize = cell.map((c) => c * 2 * size);
                         const res = [
                             ...(isBoundaryTop(cell)
                                 ? top(offsetVertex(cellWithSize))
@@ -175,36 +157,35 @@ export class VoxelMesh {
         });
     }
 
-    #octree(cell, level, cellsSide, [ox, oy, oz] = [0, 0, 0]) {
+    #octree(cell, level, cellsSide, [ox, oy, oz], cellsLookup) {
         if (Math.pow(2, level) == cellsSide) {
-            return [[ox, oy, oz]];
+            cellsLookup[`${ox}.${oy}.${oz}`] = [ox, oy, oz]
         }
+        else {
+            cell.cells.forEach((c, i) => {
+                if (c) {
+                    const [ordX, ordY, ordZ] = octreeOrder[i];
+                    const offset = cellsSide / Math.pow(2, level + 2);
 
-        const res = [];
-        cell.cells.forEach((c, i) => {
-            if (c) {
-                const [ordX, ordY, ordZ] = octreeOrder[i];
-                const offset = cellsSide / Math.pow(2, level + 2);
-                res.push(
                     this.#octree(
                         c,
                         level + 1,
                         cellsSide,
-                        [ox + (ordX * offset), oy + (ordY * offset), oz + (ordZ * offset)]
+                        [ox + (ordX * offset), oy + (ordY * offset), oz + (ordZ * offset)],
+                        cellsLookup
                     )
-                );
-            }
-        });
-
-        return res.flat();
+                }
+            });
+        }
     }
 
     constructOctree(cell, level) {
         const cellsSide = Math.pow(2, level);
-        const cells = this.#octree(cell, 0, cellsSide);
+        const cellsObj = {}
+        this.#octree(cell, 0, cellsSide, [0, 0, 0], cellsObj);
 
         const size = this.#options.size / cellsSide;
-        this.#construct(cells, size).then((voxels) => {
+        this.#construct(cellsObj, size).then((voxels) => {
             this.#mesh.geometry.setAttribute(
                 'position',
                 new BufferAttribute(new Float32Array(voxels.vertices), 3)

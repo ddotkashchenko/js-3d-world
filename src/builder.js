@@ -112,11 +112,11 @@ export default class Builder {
         cube.position.set(-128, 50, 0);
         this._scene.add(cube);
 
-        this._scene.add(
-            makePyramid(4, 2, new THREE.Vector3(-80, 50, 0), {
-                wireframe: false,
-            })
-        );
+        // this._scene.add(
+        //     makePyramid(4, 2, new THREE.Vector3(-80, 50, 0), {
+        //         wireframe: false,
+        //     })
+        // );
 
         this._scene.add(makeOctreeSphere());
         // this._scene.add(

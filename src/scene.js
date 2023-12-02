@@ -87,6 +87,7 @@ function makeSphere(radius, level, maxLevel, [offsetX, offsetY, offsetZ]) {
 }
 
 function makeOctreeSphere() {
+
     const res = 6;
 
     const shape = makeSphere(1.66, 0, res, [0, 0, 0]);
