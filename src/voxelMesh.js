@@ -2,46 +2,47 @@ import {
     BufferAttribute,
     BufferGeometry,
     Mesh,
-    MeshBasicMaterial,
-    MeshPhongMaterial,
     MeshStandardMaterial,
-    MeshToonMaterial,
     Vector3,
 } from 'three';
 
 export default class VoxelMesh {
     #mesh;
+    #options;
 
     constructor(options) {
-
-        this._options = { size: 1, position: new Vector3(), ...options };
-        this._initMesh();
+        this.#options = { size: 1, position: new Vector3(), ...options };
+        this.#initMesh();
 
         Object.defineProperty(this, 'mesh', {
-            value: this.#mesh
+            value: this.#mesh,
         });
     }
 
-    _initMesh() {
+    #initMesh() {
         const mesh = new Mesh(
             new BufferGeometry(),
             new MeshStandardMaterial({
                 color: 0xaaaaff,
                 flatShading: true,
                 wireframe: false,
-                ...this._options.material
+                ...this.#options.material,
             })
         );
-        mesh.name = this._options.name;
-        mesh.position.set(this._options.position.x, this._options.position.y, this._options.position.z);
+        mesh.name = this.#options.name;
+        mesh.position.set(
+            this.#options.position.x,
+            this.#options.position.y,
+            this.#options.position.z
+        );
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         mesh.frustumCulled = false;
 
         this.#mesh = mesh;
-    } 
+    }
 
-    async _construct(cells) {
+    async #construct(cells, size) {
         const verticesGrouped = [];
         const indices = [];
         const verticesLookup = {};
@@ -49,10 +50,9 @@ export default class VoxelMesh {
         const offsetVertex =
             ([ox, oy, oz] = [0, 0, 0]) =>
             (x, y, z) => {
-
-                x *= this._options.size;
-                y *= this._options.size;
-                z *= this._options.size;
+                x *= size;
+                y *= size;
+                z *= size;
 
                 const key = `${x + ox}.${y + oy}.${z + oz}`;
                 let index = verticesLookup[key];
@@ -123,35 +123,37 @@ export default class VoxelMesh {
                 ([vx, vy, vz]) => cx === vx && cy === vy && cz - 1 === vz
             );
 
-        let cellTasks = cells
-            .map((cell) => new Promise((resolve) => 
-                setTimeout(() => {
-                    const cellWithSize = cell.map(c => c * 2 * this._options.size);
-                    const res = [
-                    ...(isBoundaryTop(cell)
-                        ? top(offsetVertex(cellWithSize))
-                        : []),
-                    ...(isBoundaryBottom(cell)
-                        ? bottom(offsetVertex(cellWithSize))
-                        : []),
-                    ...(isBoundaryLeft(cell)
-                        ? left(offsetVertex(cellWithSize))
-                        : []),
-                    ...(isBoundaryRight(cell)
-                        ? right(offsetVertex(cellWithSize))
-                        : []),
-                    ...(isBoundaryFront(cell)
-                        ? front(offsetVertex(cellWithSize))
-                        : []),
-                    ...(isBoundaryBack(cell)
-                        ? back(offsetVertex(cellWithSize))
-                        : []),
-                    ];
-                    resolve(res);
-                }, 0)
-            ));
+        let cellTasks = cells.map(
+            (cell) =>
+                new Promise((resolve) =>
+                    setTimeout(() => {
+                        const cellWithSize = cell.map((c) => c * 2 * size); //this.#options.size);
+                        const res = [
+                            ...(isBoundaryTop(cell)
+                                ? top(offsetVertex(cellWithSize))
+                                : []),
+                            ...(isBoundaryBottom(cell)
+                                ? bottom(offsetVertex(cellWithSize))
+                                : []),
+                            ...(isBoundaryLeft(cell)
+                                ? left(offsetVertex(cellWithSize))
+                                : []),
+                            ...(isBoundaryRight(cell)
+                                ? right(offsetVertex(cellWithSize))
+                                : []),
+                            ...(isBoundaryFront(cell)
+                                ? front(offsetVertex(cellWithSize))
+                                : []),
+                            ...(isBoundaryBack(cell)
+                                ? back(offsetVertex(cellWithSize))
+                                : []),
+                        ];
+                        resolve(res);
+                    }, 0)
+                )
+        );
 
-        for(const task of cellTasks) {
+        for (const task of cellTasks) {
             indices.push(await task);
         }
 
@@ -162,14 +164,62 @@ export default class VoxelMesh {
     }
 
     construct(cells) {
-        this._construct(cells).then((voxels) => {
+        this.#construct(cells, this.#options.size).then((voxels) => {
             this.#mesh.geometry.setAttribute(
                 'position',
                 new BufferAttribute(new Float32Array(voxels.vertices), 3)
-                );
-                
+            );
+
             this.#mesh.geometry.setIndex(voxels.indices);
             this.#mesh.geometry.computeVertexNormals();
-        });         
+        });
+    }
+
+    // prettier-ignore
+    #octreeOrder = [
+        [-1, -1, -1],   [1, -1, -1], 
+        [-1, 1, -1],    [1, 1, -1], 
+        [-1, -1, 1],    [1, -1, 1],
+        [-1, 1, 1],     [1, 1, 1]
+    ];
+
+    #octree(cell, level, cellsSide, [ox, oy, oz] = [0, 0, 0]) {
+        if (Math.pow(2, level) == cellsSide) {
+            return [[ox, oy, oz]];
+        }
+
+        const res = [];
+        cell.cells.forEach((c, i) => {
+            if (c) {
+                const [ordX, ordY, ordZ] = this.#octreeOrder[i];
+                const offset = cellsSide / Math.pow(2, level + 2);
+                res.push(
+                    this.#octree(
+                        c,
+                        level + 1,
+                        cellsSide,
+                        [ox + (ordX * offset), oy + (ordY * offset), oz + (ordZ * offset)]
+                    )
+                );
+            }
+        });
+
+        return res.flat();
+    }
+
+    constructOctree(cell, level) {
+        const cellsSide = Math.pow(2, level);
+        const cells = this.#octree(cell, 0, cellsSide);
+
+        const size = this.#options.size / cellsSide;
+        this.#construct(cells, size).then((voxels) => {
+            this.#mesh.geometry.setAttribute(
+                'position',
+                new BufferAttribute(new Float32Array(voxels.vertices), 3)
+            );
+
+            this.#mesh.geometry.setIndex(voxels.indices);
+            this.#mesh.geometry.computeVertexNormals();
+        });
     }
 }

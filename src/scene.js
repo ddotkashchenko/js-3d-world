@@ -65,4 +65,37 @@ function makePyramid(height, size, position, material) {
     return pyramid.mesh;
 }
 
-export { makePlane, makeCube, makePyramid };
+function makeOctreePyramid(position) {
+    // const shape = {
+    //     cells: [1, 1, 1, 1, 1, 1, 1, null], //.map(c => Boolean(c))
+    // };
+
+    const shape = {
+        cells: [
+            {cells: [1, 1, 1, 1, 1, 1, 1, null]},
+            {cells: [1, 1, 1, 1, 1, 1, 1, null]},
+            {cells: [1, 1, 1, 1, 1, 1, 1, null]},
+            {cells: [1, 1, 1, 1, 1, 1, 1, null]},
+            {cells: [1, 1, 1, 1, 1, 1, 1, null]},
+            {cells: [1, 1, 1, 1, 1, 1, 1, null]},
+            {cells: [1, 1, 1, 1, 1, 1, 1, null]},
+            null,
+            null
+        ],
+    };
+
+    const pyramid = new VoxelMesh({
+        size: 32,
+        name: 'octree-pyramid',
+        position,
+        material: {
+            color: 0x44bbbb,
+            wireframe: false,
+        },
+    });
+
+    pyramid.constructOctree(shape, 2);
+    return pyramid.mesh;
+}
+
+export { makePlane, makeCube, makePyramid, makeOctreePyramid };

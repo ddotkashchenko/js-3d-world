@@ -4,7 +4,7 @@ import Controller from './controller';
 import Controls from './controls';
 // import VoxelTerrain from './voxelTerrain';
 import { fromImage } from './heightmap';
-import { makeCube, makePlane, makePyramid } from './scene';
+import { makeCube, makeOctreePyramid, makePlane, makePyramid } from './scene';
 import VoxelMesh from './voxelMesh';
 
 export default class Builder {
@@ -57,51 +57,49 @@ export default class Builder {
     }
 
     async addScene() {
-        const icelandBitmap = await fromImage({
-            imgUrl: './iceland_heightmap.png',
-        });
+        // const icelandBitmap = await fromImage({
+        //     imgUrl: './iceland_heightmap.png',
+        // });
 
-        let heightmap = icelandBitmap.load(16);
+        //let heightmap = icelandBitmap.load(16);
 
-        const plane = makePlane({
-            width: 128,
-            height: 128 / icelandBitmap.aspectRatio,
-            material: {
-                map: new THREE.CanvasTexture(
-                    await heightmap.downresBitmapAsync()
-                ),
-            },
-        });
-        plane.position.set(0, 0, 130 / icelandBitmap.aspectRatio);
-        plane.name = 'heightmap';
-        this._scene.add(plane);
+        // const plane = makePlane({
+        //     width: 128,
+        //     height: 128 / icelandBitmap.aspectRatio,
+        //     material: {
+        //         map: new THREE.CanvasTexture(
+        //             await heightmap.downresBitmapAsync()
+        //         ),
+        //     },
+        // });
+        // plane.position.set(0, 0, 130 / icelandBitmap.aspectRatio);
+        // plane.name = 'heightmap';
+        // this._scene.add(plane);
 
-        const makeTerrain = (width, heightY, heightmap, position) => {
-            const size = width / (heightmap.width / (heightmap.pixelSize / 2))
-            const terrain2 = new VoxelMesh({
-                size,
-                name: 'voxelTerrain',
-                position,
-                material: { color: 0xbce791, wireframe: false },
-            });
+        // const makeTerrain = (width, heightY, heightmap, position) => {
+        //     const size = width / (heightmap.width / (heightmap.pixelSize / 2));
+        //     const terrain2 = new VoxelMesh({
+        //         size,
+        //         name: 'voxelTerrain',
+        //         position,
+        //         material: { color: 0xbce791, wireframe: false },
+        //     });
 
-            const cells2 = heightmap.voxelize2(heightY);
-            terrain2.construct(cells2);
-            this._scene.add(terrain2.mesh);
-        };
+        //     const cells2 = heightmap.voxelize2(heightY);
+        //     terrain2.construct(cells2);
+        //     this._scene.add(terrain2.mesh);
+        // };
 
-        heightmap = icelandBitmap.load(64);
-        makeTerrain(
-            128, 8, heightmap, new THREE.Vector3().setComponent(0, -130)
-        );
+        // heightmap = icelandBitmap.load(64);
+        // makeTerrain(
+        //     128,
+        //     8,
+        //     heightmap,
+        //     new THREE.Vector3().setComponent(0, -130)
+        // );
 
-        heightmap = icelandBitmap.load(32);
-        makeTerrain(
-            128,
-            16,
-            heightmap,
-            new THREE.Vector3()
-        );
+        // heightmap = icelandBitmap.load(32);
+        // makeTerrain(128, 16, heightmap, new THREE.Vector3());
 
         // heightmap = icelandBitmap.load(16);
         // makeTerrain(
@@ -113,14 +111,18 @@ export default class Builder {
 
         const cube = makeCube(2);
         cube.name = 'cube';
-        cube.position.set(0, 50, 0);
+        cube.position.set(-128, 50, 0);
         this._scene.add(cube);
 
         this._scene.add(
-            makePyramid(4, 1, new THREE.Vector3(-10, 50, 0), {
+            makePyramid(4, 2, new THREE.Vector3(-80, 50, 0), {
                 wireframe: false,
             })
         );
+
+        this._scene.add(
+            makeOctreePyramid(new THREE.Vector3(0, 50, 0))
+        )
 
         this._controller = new Controller(this._scene, {});
 
@@ -136,7 +138,7 @@ export default class Builder {
                 move: (obj, vec) => {
                     this._controller.move(obj, vec);
                 },
-                activeObjectName: 'cube',
+                activeObjectName: 'voxel-pyramid',
                 excludeSelecting: ['terrain'],
             }
         );
