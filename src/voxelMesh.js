@@ -154,6 +154,7 @@ export class VoxelMesh {
 
             this.#mesh.geometry.setIndex(voxels.indices);
             this.#mesh.geometry.computeVertexNormals();
+            this.#mesh.geometry.computeBoundingBox();
         });
     }
 
@@ -193,6 +194,7 @@ export class VoxelMesh {
 
             this.#mesh.geometry.setIndex(voxels.indices);
             this.#mesh.geometry.computeVertexNormals();
+            this.#mesh.geometry.computeBoundingBox();
         });
     }
 }

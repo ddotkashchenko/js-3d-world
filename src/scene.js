@@ -27,12 +27,20 @@ function makePlane(options) {
     return plane;
 }
 
-function makeCube(size) {
+function makeCube(options) {
+    const {size, name, position, material} = {
+        size: 2,
+        name: 'cube',
+        position: new Vector3(-100, 70, 0),
+        material:  { color: 0xff5555, wireframe: false }
+    };
+
     const cube = new Mesh(
         new BoxGeometry(size, size, size, 1, 1, 1),
-        new MeshStandardMaterial({ color: 0xff5555, wireframe: false })
+        new MeshStandardMaterial(material)
     );
-
+    cube.name = name;
+    cube.position.set(position.x, position.y, position.z),
     cube.castShadow = true;
     cube.receiveShadow = true;
 
@@ -70,7 +78,7 @@ function makeWater(width, height, heightLevel, material) {
         new PlaneGeometry(width, height, 1, 1),
         new MeshStandardMaterial({
             color: 0x1da2d8,
-            ...material
+            ...material,
         })
     );
     mesh.rotateX(-Math.PI / 2);
@@ -79,7 +87,12 @@ function makeWater(width, height, heightLevel, material) {
     return mesh;
 }
 
-function makeSphere(radius, level, maxLevel, [offsetX, offsetY, offsetZ]) {
+function calcSphere(
+    radius,
+    level,
+    maxLevel,
+    [offsetX, offsetY, offsetZ] = [0, 0, 0]
+) {
     if (level == maxLevel) {
         return 1;
     }
@@ -93,34 +106,40 @@ function makeSphere(radius, level, maxLevel, [offsetX, offsetY, offsetZ]) {
                 offsetZ + signZ / pow
             );
 
-            return v.length() >= radius + (radius * 0.7 / pow)
+            return v.length() >= radius + (radius * 0.7) / pow
                 ? null
-                : makeSphere(radius, level + 1, maxLevel, v);
+                : calcSphere(radius, level + 1, maxLevel, v);
         }),
     };
 }
 
-function makeOctreeSphere(position) {
-
-    const res = 8;
-
-    const shape = makeSphere(1.66, 0, res, [0, 0, 0]);
-
-    const sphere = new VoxelMesh({
+function makeOctreeSphere(options) {
+    const {radius, name, res, size, position, material} = {
+        radius: 1.666,
+        name: 'sphere',
+        res: 4,
+        position: new Vector3(),
         size: 32,
-        name: 'octree-pyramid',
-        position,
         material: {
             color: 0x44bbbb,
             wireframe: false,
         },
+        ...options,
+    };
+
+    const shape = calcSphere(radius, 0, res);
+
+    const sphere = new VoxelMesh({
+        size,
+        name,
+        position,
+        material
     });
     sphere.constructOctree(shape, res - 1);
     return sphere.mesh;
 }
 
 function makeOctreePyramid(position) {
-
     let shape = {
         cells: [
             { cells: [1, 1, 1, 1, null, null, null, 1] },
@@ -159,5 +178,5 @@ export {
     makePyramid,
     makeOctreePyramid,
     makeOctreeSphere,
-    makeWater
+    makeWater,
 };

@@ -68,7 +68,6 @@ class Heightmap {
         
                         for (let cy = 0; cy < cellY; cy++) {
                             cells[`${cellX}.${cy}.${cellZ}`] = [cellX, cy, cellZ];
-                            // cells.push([cellX, cy, cellZ]);
                         }
                         cellZ++;
                     }
@@ -99,8 +98,6 @@ class Heightmap {
     //     positionAttribute.needsUpdate = true;
     //     geometry.computeVertexNormals();
     // }
-
-    
 }
 
 const fromImage = async ({ imgUrl, options }) => {
