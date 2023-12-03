@@ -38,7 +38,7 @@ export default class Controls {
         if (!currentPosition.equals(this._previousPosition)) {
             const { x, y, z } = currentPosition;
             this._orbitControls.target.set(x, y, z);
-
+            this._camera.position.add(this._orbitControls.target);
             this._orbitControls.update();
             this._focused = true;
         }
@@ -73,33 +73,10 @@ export default class Controls {
                 // );
 
             if (intersects.length) {
-                const newPos = this._orbitControls.target
-                    .clone()
-                    .add(new THREE.Vector3(10, 10, 0));
-                this._camera.position.set(newPos.x, newPos.y, newPos.y);
+                
                 this._activeObject = intersects[0].object;
                 this._focused = false;
             }
         });
-
-        // window.addEventListener('keydown', (e) => {
-        //     const vec = new THREE.Vector3();
-        //     switch (e.key) {
-        //         case 'w':
-        //             vec.add(new THREE.Vector3(0, 0, -1));
-        //             break;
-        //         case 's':
-        //             vec.add(new THREE.Vector3(0, 0, 1));
-        //             break;
-        //         case 'a':
-        //             vec.add(new THREE.Vector3(1, 0, 0));
-        //             break;
-        //         case 'd':
-        //             vec.add(new THREE.Vector3(-1, 0, 0));
-        //             break;
-        //     }
-        //     this._options.move && this._options.move(this._activeObject, vec);
-        //     this._camera.position.add(vec);
-        // });
     }
 }

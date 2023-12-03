@@ -32,7 +32,8 @@ function makeCube(options) {
         size: 2,
         name: 'cube',
         position: new Vector3(-100, 70, 0),
-        material:  { color: 0xff5555, wireframe: false }
+        material:  { color: 0xff5555, wireframe: false },
+        ...options
     };
 
     const cube = new Mesh(

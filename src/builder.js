@@ -88,11 +88,20 @@ export default class Builder {
         this._scene.add(
             makeCube({position: new THREE.Vector3(-100, 70, 0)}));
 
-        this._scene.add(
-            makeOctreeSphere({res: 4, position: new THREE.Vector3(0, 170, 0)}));
+        const sphere = makeOctreeSphere({res: 4, position: new THREE.Vector3(0, 170, 0)});
+        this._scene.add(sphere);
+        
+        const bh = new THREE.BoxHelper(sphere, 0xFFFF00);
+        bh.position.add(sphere.position);
+
+        this._scene.add(bh);
 
 
-        this._scene.children.forEach(c => this._scene.add(new THREE.BoxHelper(c, 0xFFFF00)));
+        // this._scene.children.forEach(c => {
+        //     const bh = new THREE.BoxHelper(c, 0xFFFF00);
+        //     bh.position.add(c.position);
+        //     this._scene.add(bh);
+        // });
 
         this._controller = new Controller(this._scene, {});
         this._next.push((t) => this._controller.step(t));
@@ -107,7 +116,6 @@ export default class Builder {
                 move: (obj, vec) => {
                     this._controller.move(obj, vec);
                 },
-                activeObjectName: 'voxel-pyramid',
                 excludeSelecting: ['terrain'],
             }
         );
