@@ -129,7 +129,6 @@ function makeOctreeSphere(options) {
     };
 
     const shape = calcSphere(radius, 0, res);
-
     const sphere = new VoxelMesh({
         size,
         name,

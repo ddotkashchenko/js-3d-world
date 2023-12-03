@@ -44,7 +44,11 @@ export default class Controls {
         }
     }
 
-    bind() {
+    bind(eventName, handler) {
+        this._domElement.addEventListener(eventName, (e) => handler(e));
+    }
+
+    bindDefault() {
         let drag = false;
         this._domElement.addEventListener('mousedown', (e) => {
             if(e.buttons == 1)

@@ -3,23 +3,29 @@ import World from './world';
 import Controller from './controller';
 import Controls from './controls';
 import { VoxelMesh } from './voxelMesh';
-import {Heightmap, fromImage} from './heightmap';
-import { makeCube, makeOctreePyramid, makeOctreeSphere, makePlane, makeWater } from './scene';
+import {fromImage} from './heightmap';
+import { makeCube, makeOctreeSphere, makePlane, makeWater } from './scene';
 
 export default class Builder {
+    #threejs;
+    #scene;
+    #controller;
+    #next;
+    #camera;
+
     constructor() {
-        this._threejs = new THREE.WebGLRenderer({ alpha: true });
+        this.#threejs = new THREE.WebGLRenderer({ alpha: true });
 
-        this._threejs.shadowMap.enabled = true;
-        this._threejs.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.#threejs.shadowMap.enabled = true;
+        this.#threejs.shadowMap.type = THREE.PCFSoftShadowMap;
 
-        this._threejs.setPixelRatio(window.devicePixelRatio);
-        this._threejs.setSize(window.innerWidth, window.innerHeight);
+        this.#threejs.setPixelRatio(window.devicePixelRatio);
+        this.#threejs.setSize(window.innerWidth, window.innerHeight);
 
-        this._scene = new THREE.Scene();
-        this._controller = { step: () => {} };
+        this.#scene = new THREE.Scene();
+        this.#controller = { step: () => {} };
 
-        this._next = [];
+        this.#next = [];
     }
 
     addPerspectiveCamera() {
@@ -27,8 +33,8 @@ export default class Builder {
         const aspect = 1920 / 1080;
         const near = 0.01;
         const far = 1000.0;
-        this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-        this._camera.position.set(0, 70, 30);
+        this.#camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+        this.#camera.position.set(0, 70, 30);
     }
 
     addDirectionalLight(pos) {
@@ -47,12 +53,12 @@ export default class Builder {
         directionalLight.shadow.camera.top = 1000;
         directionalLight.shadow.camera.bottom = -100;
 
-        this._scene.add(directionalLight);
+        this.#scene.add(directionalLight);
     }
 
     addAmbientLight() {
         const ambientLight = new THREE.AmbientLight(0x808080);
-        this._scene.add(ambientLight);
+        this.#scene.add(ambientLight);
     }
 
     async addScene() {
@@ -71,7 +77,7 @@ export default class Builder {
 
             const cells2 = heightmap.voxelize2(heightY);
             terrain2.construct(cells2);
-            this._scene.add(terrain2.mesh);
+            this.#scene.add(terrain2.mesh);
         };
 
         const heightmap = icelandBitmap.load(16);
@@ -82,55 +88,43 @@ export default class Builder {
             new THREE.Vector3()
         );
 
-        this._scene.add(
+        this.#scene.add(
             makeWater(heightmap.width, heightmap.height, 4.5));
 
-        this._scene.add(
+        this.#scene.add(
             makeCube({position: new THREE.Vector3(-100, 70, 0)}));
 
-        const sphere = makeOctreeSphere({res: 4, position: new THREE.Vector3(0, 170, 0)});
-        this._scene.add(sphere);
+        const sphere = makeOctreeSphere({res: 4, name: 'octree-sphere', position: new THREE.Vector3(0, 170, 0)});
+        this.#scene.add(sphere);
         
-        const bh = new THREE.BoxHelper(sphere, 0xFFFF00);
-        bh.position.add(sphere.position);
-
-        this._scene.add(bh);
-
-
-        // this._scene.children.forEach(c => {
-        //     const bh = new THREE.BoxHelper(c, 0xFFFF00);
-        //     bh.position.add(c.position);
-        //     this._scene.add(bh);
-        // });
-
-        this._controller = new Controller(this._scene, {});
-        this._next.push((t) => this._controller.step(t));
+        this.#controller = new Controller(this.#scene, {});
+        this.#next.push((t) => this.#controller.step(t));
     }
 
     addControls() {
         this._controls = new Controls(
-            this._threejs.domElement,
-            this._camera,
-            this._scene,
+            this.#threejs.domElement,
+            this.#camera,
+            this.#scene,
             {
                 move: (obj, vec) => {
-                    this._controller.move(obj, vec);
+                    this.#controller.move(obj, vec);
                 },
                 excludeSelecting: ['terrain'],
             }
         );
 
-        this._next.push((t) => this._controls.step(t));
+        this.#next.push((t) => this._controls.step(t));
+        this._controls.bindDefault();
     }
 
     build() {
-        this._controls.bind();
 
         const world = new World(
-            this._threejs,
-            this._scene,
-            this._camera,
-            this._next
+            this.#threejs,
+            this.#scene,
+            this.#camera,
+            this.#next
         );
 
         return world;
