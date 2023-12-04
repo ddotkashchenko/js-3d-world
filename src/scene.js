@@ -118,7 +118,7 @@ function makeOctreeSphere(options) {
     const {radius, name, res, size, position, material} = {
         radius: 1.666,
         name: 'sphere',
-        res: 4,
+        res: 3,
         position: new Vector3(),
         size: 32,
         material: {
@@ -136,7 +136,7 @@ function makeOctreeSphere(options) {
         material
     });
     sphere.constructOctree(shape, res - 1);
-    return sphere.mesh;
+    return sphere;
 }
 
 function makeOctreePyramid(position) {

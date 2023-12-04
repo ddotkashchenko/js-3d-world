@@ -12,6 +12,8 @@ export default class Builder {
     #controller;
     #next;
     #camera;
+    #voxelMeshes;
+    #controls;
 
     constructor() {
         this.#threejs = new THREE.WebGLRenderer({ alpha: true });
@@ -26,6 +28,7 @@ export default class Builder {
         this.#controller = { step: () => {} };
 
         this.#next = [];
+        this.#voxelMeshes = [];
     }
 
     addPerspectiveCamera() {
@@ -68,16 +71,16 @@ export default class Builder {
 
         const makeTerrain = (width, heightY, heightmap, position) => {
             const size = width / (heightmap.width / (heightmap.pixelSize / 2));
-            const terrain2 = new VoxelMesh({
+            const terrain = new VoxelMesh({
                 size,
                 name: 'voxelTerrain',
                 position,
                 material: { color: 0xbce791, wireframe: false },
             });
 
-            const cells2 = heightmap.voxelize2(heightY);
-            terrain2.construct(cells2);
-            this.#scene.add(terrain2.mesh);
+            const cells = heightmap.voxelize2(heightY);
+            terrain.construct(cells);
+            this.#voxelMeshes.push(terrain);
         };
 
         const heightmap = icelandBitmap.load(16);
@@ -94,15 +97,18 @@ export default class Builder {
         this.#scene.add(
             makeCube({position: new THREE.Vector3(-100, 70, 0)}));
 
-        const sphere = makeOctreeSphere({res: 4, name: 'octree-sphere', position: new THREE.Vector3(0, 170, 0)});
-        this.#scene.add(sphere);
+        this.#voxelMeshes.push(
+            makeOctreeSphere({res: 4, name: 'octree-sphere', position: new THREE.Vector3(0, 170, 0)})
+        );
         
         this.#controller = new Controller(this.#scene, {});
         this.#next.push((t) => this.#controller.step(t));
+
+        this.#voxelMeshes.forEach(({mesh}) => this.#scene.add(mesh));
     }
 
     addControls() {
-        this._controls = new Controls(
+        this.#controls = new Controls(
             this.#threejs.domElement,
             this.#camera,
             this.#scene,
@@ -114,8 +120,21 @@ export default class Builder {
             }
         );
 
-        this.#next.push((t) => this._controls.step(t));
-        this._controls.bindDefault();
+        this.#next.push((t) => this.#controls.step(t));
+
+        this.#controls.bindDefault();
+
+        let sphereTopLevel = 4;
+
+        this.#controls.bindKey('+', () => {
+            const sphere = this.#voxelMeshes.find(vm => vm.name === 'octree-sphere');
+            sphere.updateTop(++sphereTopLevel);
+        });
+
+        this.#controls.bindKey('-', () => {
+            const sphere = this.#voxelMeshes.find(vm => vm.name === 'octree-sphere');
+            sphere.updateTop(--sphereTopLevel > 0 ? sphereTopLevel : 0);
+        });
     }
 
     build() {

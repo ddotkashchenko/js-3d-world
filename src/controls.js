@@ -44,8 +44,13 @@ export default class Controls {
         }
     }
 
-    bind(eventName, handler) {
-        this._domElement.addEventListener(eventName, (e) => handler(e));
+    // make binds dictionary
+    bindKey(bindKey, handler) {
+        this._domElement.addEventListener('keydown', ({key}) => {
+            if(key === bindKey) {
+                handler()
+            }
+        });
     }
 
     bindDefault() {

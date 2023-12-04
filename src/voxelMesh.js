@@ -17,6 +17,10 @@ export class VoxelMesh {
         Object.defineProperty(this, 'mesh', {
             value: this.#mesh,
         });
+
+        Object.defineProperty(this, 'name', {
+            value: this.#mesh.name
+        });
     }
 
     #initMesh() {
@@ -178,6 +182,13 @@ export class VoxelMesh {
                 }
             });
         }
+    }
+
+    updateTop(level) {
+        // ask source to build required level
+        // construct new geometry data
+        // append vertices and indices buffer
+        // create new geometry
     }
 
     constructOctree(cell, level) {
