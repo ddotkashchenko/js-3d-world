@@ -37,7 +37,7 @@ export default class Builder {
         const near = 0.01;
         const far = 1000.0;
         this.#camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-        this.#camera.position.set(0, 70, 30);
+        this.#camera.position.set(-90, 50, 90);
     }
 
     addDirectionalLight(pos) {
@@ -95,7 +95,7 @@ export default class Builder {
             makeWater(heightmap.width, heightmap.height, 4.5));
 
         this.#scene.add(
-            makeCube({position: new THREE.Vector3(-100, 70, 0)}));
+            makeCube({position: new THREE.Vector3(-100, 71, 0)}));
 
         this.#voxelMeshes.push(
             makeOctreeSphere({res: 4, name: 'octree-sphere', position: new THREE.Vector3(0, 170, 0)})
@@ -117,6 +117,7 @@ export default class Builder {
                     this.#controller.move(obj, vec);
                 },
                 excludeSelecting: ['terrain'],
+                activeObjectName: 'octree-sphere'
             }
         );
 
@@ -124,7 +125,7 @@ export default class Builder {
 
         this.#controls.bindDefault();
 
-        let sphereTopLevel = 4;
+        let sphereTopLevel = 3;
 
         this.#controls.bindKey('+', () => {
             const sphere = this.#voxelMeshes.find(vm => vm.name === 'octree-sphere');

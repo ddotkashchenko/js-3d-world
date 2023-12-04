@@ -92,6 +92,7 @@ function calcSphere(
     radius,
     level,
     maxLevel,
+    options,
     [offsetX, offsetY, offsetZ] = [0, 0, 0]
 ) {
     if (level == maxLevel) {
@@ -107,9 +108,12 @@ function calcSphere(
                 offsetZ + signZ / pow
             );
 
-            return v.length() >= radius + (radius * 0.7) / pow
+            if(options && level < 1 && signY != options.rebuild[1]) {
+                return null;
+            }
+            return (v.length() >= radius + (radius * 0.7) / pow)
                 ? null
-                : calcSphere(radius, level + 1, maxLevel, v);
+                : calcSphere(radius, level + 1, maxLevel, options, v);
         }),
     };
 }
@@ -128,14 +132,15 @@ function makeOctreeSphere(options) {
         ...options,
     };
 
-    const shape = calcSphere(radius, 0, res);
+    // const shape = calcSphere(radius, 0, res);
     const sphere = new VoxelMesh({
         size,
         name,
         position,
-        material
+        material,
+        source: (res, ro) => calcSphere(radius, 0, res, ro)
     });
-    sphere.constructOctree(shape, res - 1);
+    sphere.constructOctree(res - 1);
     return sphere;
 }
 

@@ -185,16 +185,35 @@ export class VoxelMesh {
     }
 
     updateTop(level) {
+        
+        console.log(`building ${level}`);
+    
+        const cellsSide = Math.pow(2, level);
+        const octree = this.#options.source(level, {rebuild: [0, 1, 0 ]});
+        const cellsObj = {}
+        this.#octree(octree, 0, cellsSide, [0, 0, 0], cellsObj);
+
+        const size = this.#options.size / cellsSide;
+        this.#construct(cellsObj, size).then((voxels) => {
+            this.#mesh.geometry.setAttribute(
+                'position',
+                new BufferAttribute(new Float32Array(voxels.vertices), 3)
+            );
+
+            this.#mesh.geometry.setIndex(voxels.indices);
+            this.#mesh.geometry.computeVertexNormals();
+            this.#mesh.geometry.computeBoundingBox();
+        });
         // ask source to build required level
         // construct new geometry data
         // append vertices and indices buffer
         // create new geometry
     }
 
-    constructOctree(cell, level) {
+    constructOctree(level) {
         const cellsSide = Math.pow(2, level);
         const cellsObj = {}
-        this.#octree(cell, 0, cellsSide, [0, 0, 0], cellsObj);
+        this.#octree(this.#options.source(level + 1), 0, cellsSide, [0, 0, 0], cellsObj);
 
         const size = this.#options.size / cellsSide;
         this.#construct(cellsObj, size).then((voxels) => {
