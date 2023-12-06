@@ -4,6 +4,9 @@ import {
     Mesh,
     MeshStandardMaterial,
     Vector3,
+    EdgesGeometry,
+    LineBasicMaterial,
+    LineSegments
 } from 'three';
 
 export class VoxelMesh {
@@ -29,7 +32,7 @@ export class VoxelMesh {
             new MeshStandardMaterial({
                 color: 0xaaaaff,
                 flatShading: true,
-                wireframe: false,
+                wireframe: true,
                 ...this.#options.material,
             })
         );
@@ -43,7 +46,9 @@ export class VoxelMesh {
         mesh.receiveShadow = true;
         mesh.frustumCulled = false;
 
+        
         this.#mesh = mesh;
+
     }
 
     async #construct(cells, size) {
@@ -162,8 +167,8 @@ export class VoxelMesh {
         });
     }
 
-    #octree(cell, level, cellsSide, [ox, oy, oz], cellsLookup) {
-        if (Math.pow(2, level) == cellsSide) {
+    #flatOctree(cell, level, cellsSide, [ox, oy, oz], cellsLookup) {
+        if (cell.leaf || Math.pow(2, level) == cellsSide) {
             cellsLookup[`${ox}.${oy}.${oz}`] = [ox, oy, oz]
         }
         else {
@@ -172,7 +177,7 @@ export class VoxelMesh {
                     const [ordX, ordY, ordZ] = octreeOrder[i];
                     const offset = cellsSide / Math.pow(2, level + 2);
 
-                    this.#octree(
+                    this.#flatOctree(
                         c,
                         level + 1,
                         cellsSide,
@@ -184,36 +189,40 @@ export class VoxelMesh {
         }
     }
 
-    updateTop(level) {
-        
+    updateTop(level) {    
         console.log(`building ${level}`);
     
-        const cellsSide = Math.pow(2, level);
         const octree = this.#options.source(level, {rebuild: [0, 1, 0 ]});
+        console.log(`build octree: `, octree);
+        
+        const cellsSide = Math.pow(2, level);
         const cellsObj = {}
-        this.#octree(octree, 0, cellsSide, [0, 0, 0], cellsObj);
+        this.#flatOctree(octree, 0, cellsSide, [0, 0, 0], cellsObj);
 
-        const size = this.#options.size / cellsSide;
-        this.#construct(cellsObj, size).then((voxels) => {
+        console.log(`flat octree: `, cellsObj);
+
+        const voxelSize = this.#options.size / cellsSide;
+        this.#construct(cellsObj, voxelSize).then((voxels) => {
             this.#mesh.geometry.setAttribute(
                 'position',
                 new BufferAttribute(new Float32Array(voxels.vertices), 3)
             );
+            
+            const positionAttribute = this.#mesh.geometry.getAttribute( 'position' );
+            positionAttribute.needsUpdate = true;
 
             this.#mesh.geometry.setIndex(voxels.indices);
+            this.#mesh.geometry.index.needsUpdate = true;
+
             this.#mesh.geometry.computeVertexNormals();
             this.#mesh.geometry.computeBoundingBox();
         });
-        // ask source to build required level
-        // construct new geometry data
-        // append vertices and indices buffer
-        // create new geometry
     }
 
     constructOctree(level) {
         const cellsSide = Math.pow(2, level);
         const cellsObj = {}
-        this.#octree(this.#options.source(level + 1), 0, cellsSide, [0, 0, 0], cellsObj);
+        this.#flatOctree(this.#options.source(level), 0, cellsSide, [0, 0, 0], cellsObj);
 
         const size = this.#options.size / cellsSide;
         this.#construct(cellsObj, size).then((voxels) => {

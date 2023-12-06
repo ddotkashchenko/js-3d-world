@@ -28,12 +28,12 @@ function makePlane(options) {
 }
 
 function makeCube(options) {
-    const {size, name, position, material} = {
+    const { size, name, position, material } = {
         size: 2,
         name: 'cube',
         position: new Vector3(-100, 70, 0),
-        material:  { color: 0xff5555, wireframe: false },
-        ...options
+        material: { color: 0xff5555, wireframe: false },
+        ...options,
     };
 
     const cube = new Mesh(
@@ -42,7 +42,7 @@ function makeCube(options) {
     );
     cube.name = name;
     cube.position.set(position.x, position.y, position.z),
-    cube.castShadow = true;
+        (cube.castShadow = true);
     cube.receiveShadow = true;
 
     return cube;
@@ -96,7 +96,7 @@ function calcSphere(
     [offsetX, offsetY, offsetZ] = [0, 0, 0]
 ) {
     if (level == maxLevel) {
-        return 1;
+        return { leaf: true };
     }
 
     return {
@@ -108,18 +108,20 @@ function calcSphere(
                 offsetZ + signZ / pow
             );
 
-            if(options && level < 1 && signY != options.rebuild[1]) {
-                return null;
-            }
-            return (v.length() >= radius + (radius * 0.7) / pow)
-                ? null
-                : calcSphere(radius, level + 1, maxLevel, options, v);
+            const insideSphere = v.length() <= radius + (radius * 0.7) / pow;
+            const continueRebuild = !options || signY === options.rebuild[1];
+            
+            return !continueRebuild
+                ? {leaf: true}
+                : insideSphere
+                ? calcSphere(radius, level + 1, maxLevel, options, v)
+                : null;
         }),
     };
 }
 
 function makeOctreeSphere(options) {
-    const {radius, name, res, size, position, material} = {
+    const { radius, name, res, size, position, material } = {
         radius: 1.666,
         name: 'sphere',
         res: 3,
@@ -132,15 +134,14 @@ function makeOctreeSphere(options) {
         ...options,
     };
 
-    // const shape = calcSphere(radius, 0, res);
     const sphere = new VoxelMesh({
         size,
         name,
         position,
         material,
-        source: (res, ro) => calcSphere(radius, 0, res, ro)
+        source: (res, ro) => calcSphere(radius, 0, res, ro),
     });
-    sphere.constructOctree(res - 1);
+    sphere.constructOctree(Math.max(0, res));
     return sphere;
 }
 

@@ -3,7 +3,7 @@ import World from './world';
 import Controller from './controller';
 import Controls from './controls';
 import { VoxelMesh } from './voxelMesh';
-import {fromImage} from './heightmap';
+import { fromImage } from './heightmap';
 import { makeCube, makeOctreeSphere, makePlane, makeWater } from './scene';
 
 export default class Builder {
@@ -84,27 +84,25 @@ export default class Builder {
         };
 
         const heightmap = icelandBitmap.load(16);
-        makeTerrain(
-            1280,
-            12,
-            heightmap,
-            new THREE.Vector3()
-        );
+        makeTerrain(1280, 12, heightmap, new THREE.Vector3());
 
-        this.#scene.add(
-            makeWater(heightmap.width, heightmap.height, 4.5));
+        this.#scene.add(makeWater(heightmap.width, heightmap.height, 4.5));
 
-        this.#scene.add(
-            makeCube({position: new THREE.Vector3(-100, 71, 0)}));
+        this.#scene.add(makeCube({ position: new THREE.Vector3(-100, 71, 0) }));
 
         this.#voxelMeshes.push(
-            makeOctreeSphere({res: 4, name: 'octree-sphere', position: new THREE.Vector3(0, 170, 0)})
+            makeOctreeSphere({
+                res: 0,
+                name: 'octree-sphere',
+                position: new THREE.Vector3(0, 170, 0),
+                material: {wireframe: false}
+            })
         );
-        
+
         this.#controller = new Controller(this.#scene, {});
         this.#next.push((t) => this.#controller.step(t));
 
-        this.#voxelMeshes.forEach(({mesh}) => this.#scene.add(mesh));
+        this.#voxelMeshes.forEach(({ mesh }) => this.#scene.add(mesh));
     }
 
     addControls() {
@@ -117,7 +115,7 @@ export default class Builder {
                     this.#controller.move(obj, vec);
                 },
                 excludeSelecting: ['terrain'],
-                activeObjectName: 'octree-sphere'
+                activeObjectName: 'octree-sphere',
             }
         );
 
@@ -125,21 +123,24 @@ export default class Builder {
 
         this.#controls.bindDefault();
 
-        let sphereTopLevel = 3;
+        let sphereTopLevel = 0;
 
         this.#controls.bindKey('+', () => {
-            const sphere = this.#voxelMeshes.find(vm => vm.name === 'octree-sphere');
+            const sphere = this.#voxelMeshes.find(
+                (vm) => vm.name === 'octree-sphere'
+            );
             sphere.updateTop(++sphereTopLevel);
         });
 
         this.#controls.bindKey('-', () => {
-            const sphere = this.#voxelMeshes.find(vm => vm.name === 'octree-sphere');
+            const sphere = this.#voxelMeshes.find(
+                (vm) => vm.name === 'octree-sphere'
+            );
             sphere.updateTop(--sphereTopLevel > 0 ? sphereTopLevel : 0);
         });
     }
 
     build() {
-
         const world = new World(
             this.#threejs,
             this.#scene,
