@@ -109,7 +109,7 @@ function calcSphere(
             );
 
             const insideSphere = v.length() <= radius + (radius * 0.7) / pow;
-            const continueRebuild = !options || signY === options.rebuild[1];
+            const continueRebuild = level > 0 || !options || signY === options.rebuild[1];
             
             return !continueRebuild
                 ? {leaf: true}

@@ -51,14 +51,15 @@ export class VoxelMesh {
 
     }
 
-    async #construct(cells, size) {
+    async #construct(cells, size, rebuild) {
         const verticesGrouped = [];
         const indices = [];
         const verticesLookup = {};
 
         const offsetVertex =
-            ([ox, oy, oz] = [0, 0, 0]) =>
+            ([ox, oy, oz] = [0, 0, 0], level = 0) =>
             (x, y, z) => {
+
                 x *= size;
                 y *= size;
                 z *= size;
@@ -118,25 +119,29 @@ export class VoxelMesh {
             (cell) =>
                 new Promise((resolve) =>
                     setTimeout(() => {
-                        const cellWithSize = cell.map((c) => c * 2 * size);
+                        const cellPosition = Array.isArray(cell) ? cell : cell.position;
+                        const level = !Array.isArray(cell) ? cell.level : 0;
+
+                        const cellWithSize = cellPosition.map((c) => c * 2 * size);
+
                         const res = [
-                            ...(isBoundaryTop(cell)
-                                ? top(offsetVertex(cellWithSize))
+                            ...(isBoundaryTop(cellPosition)
+                                ? top(offsetVertex(cellWithSize, level))
                                 : []),
-                            ...(isBoundaryBottom(cell)
-                                ? bottom(offsetVertex(cellWithSize))
+                            ...(isBoundaryBottom(cellPosition)
+                                ? bottom(offsetVertex(cellWithSize, level))
                                 : []),
-                            ...(isBoundaryLeft(cell)
-                                ? left(offsetVertex(cellWithSize))
+                            ...(isBoundaryLeft(cellPosition)
+                                ? left(offsetVertex(cellWithSize, level))
                                 : []),
-                            ...(isBoundaryRight(cell)
-                                ? right(offsetVertex(cellWithSize))
+                            ...(isBoundaryRight(cellPosition)
+                                ? right(offsetVertex(cellWithSize, level))
                                 : []),
-                            ...(isBoundaryFront(cell)
-                                ? front(offsetVertex(cellWithSize))
+                            ...(isBoundaryFront(cellPosition)
+                                ? front(offsetVertex(cellWithSize, level))
                                 : []),
-                            ...(isBoundaryBack(cell)
-                                ? back(offsetVertex(cellWithSize))
+                            ...(isBoundaryBack(cellPosition)
+                                ? back(offsetVertex(cellWithSize, level))
                                 : []),
                         ];
                         resolve(res);
@@ -169,7 +174,7 @@ export class VoxelMesh {
 
     #flatOctree(cell, level, cellsSide, [ox, oy, oz], cellsLookup) {
         if (cell.leaf || Math.pow(2, level) == cellsSide) {
-            cellsLookup[`${ox}.${oy}.${oz}`] = [ox, oy, oz]
+            cellsLookup[`${ox}.${oy}.${oz}`] = {position: [ox, oy, oz], level}
         }
         else {
             cell.cells.forEach((c, i) => {
@@ -202,7 +207,7 @@ export class VoxelMesh {
         console.log(`flat octree: `, cellsObj);
 
         const voxelSize = this.#options.size / cellsSide;
-        this.#construct(cellsObj, voxelSize).then((voxels) => {
+        this.#construct(cellsObj, voxelSize, true).then((voxels) => {
             this.#mesh.geometry.setAttribute(
                 'position',
                 new BufferAttribute(new Float32Array(voxels.vertices), 3)
