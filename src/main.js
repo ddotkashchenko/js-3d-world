@@ -6,7 +6,7 @@ async function bootstrap() {
     const builder = new Builder();
 
     builder.addPerspectiveCamera();
-    builder.addDirectionalLight(new THREE.Vector3(100, 50, 100));
+    builder.addDirectionalLight(new THREE.Vector3(100, 50, 80));
     builder.addAmbientLight();
     // builder.addController();
     // await builder.addHeightmap();

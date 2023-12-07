@@ -3,10 +3,7 @@ import {
     BufferGeometry,
     Mesh,
     MeshStandardMaterial,
-    Vector3,
-    EdgesGeometry,
-    LineBasicMaterial,
-    LineSegments
+    Vector3
 } from 'three';
 
 export class VoxelMesh {
@@ -45,10 +42,7 @@ export class VoxelMesh {
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         mesh.frustumCulled = false;
-
-        
         this.#mesh = mesh;
-
     }
 
     async #construct(cells, size, maxLevel = 0) {
