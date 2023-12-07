@@ -51,7 +51,7 @@ export class VoxelMesh {
 
     }
 
-    async #construct(cells, size, rebuild) {
+    async #construct(cells, size, maxLevel = 0) {
         const verticesGrouped = [];
         const indices = [];
         const verticesLookup = {};
@@ -59,10 +59,10 @@ export class VoxelMesh {
         const offsetVertex =
             ([ox, oy, oz] = [0, 0, 0], level = 0) =>
             (x, y, z) => {
-
-                x *= size;
-                y *= size;
-                z *= size;
+                const s = size * Math.pow(2, maxLevel - level);
+                x *= s;
+                y *= s;
+                z *= s;
 
                 const key = `${x + ox}.${y + oy}.${z + oz}`;
                 let index = verticesLookup[key];
@@ -207,7 +207,7 @@ export class VoxelMesh {
         console.log(`flat octree: `, cellsObj);
 
         const voxelSize = this.#options.size / cellsSide;
-        this.#construct(cellsObj, voxelSize, true).then((voxels) => {
+        this.#construct(cellsObj, voxelSize, level).then((voxels) => {
             this.#mesh.geometry.setAttribute(
                 'position',
                 new BufferAttribute(new Float32Array(voxels.vertices), 3)
