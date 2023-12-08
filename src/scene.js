@@ -89,7 +89,7 @@ function makeWater(width, height, heightLevel, material) {
     return mesh;
 }
 
-function octreeSphereNew() {
+function testOctree() {
     const root = new Octree();
 
     root.set([1, 1, 1]);
@@ -98,6 +98,36 @@ function octreeSphereNew() {
     root.set([1, -1, -1]);
 
     return root;
+}
+
+function octreeSphereNew(root, maxLevel, margin = 0.1, level = 0, [ox, oy, oz] = [0, 0, 0]) {
+    if(maxLevel === level) {
+        return;
+    }
+
+    const pow = Math.pow(2, level);
+    // const marginLeveled = margin / pow;
+
+    for(const [cx, cy, cz] of octreeOrder) {
+        const v = new Vector3(
+            ox + (cx / pow),
+            oy + (cy / pow),
+            oz + (cz / pow)
+        );
+        
+        const inside = v.length() <= 1.666 + (1.666 * 0.7) / pow; //(v.length() + marginLeveled) < 2;
+
+        if(inside) {
+            const cell = root.set([cx, cy, cz]);
+            // const offset = [
+            //     cell.position[0] / pow + ox,
+            //     cell.position[1] / pow + ox,
+            //     cell.position[2] / pow + ox
+            // ];
+
+            octreeSphereNew(cell, maxLevel, margin, level + 1, [v.x, v.y, v.z]); 
+        }
+    }
 }
 
 function calcSphere(

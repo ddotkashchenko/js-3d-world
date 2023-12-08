@@ -82,17 +82,16 @@ export default class OctreeDebugMesh {
     }
 
     #draw(root, level, maxLevel, offset = [0, 0, 0], bag) {
+        const halfSide = 1 / (2 * Math.pow(2, level));
         if (root.leaf || level === maxLevel) {
-            const halfSide = 1 / (2 * Math.pow(2, level));
             const [ox, oy, oz] = offset;
-            const [rx, ry, rz] = root.position;
 
             for (const { normal, vertices } of box) {
                 if (root.isBoundary(normal)) {
                     for (const [tx, ty, tz] of vertices) {
-                        const x = (tx + rx) * halfSide + ox;
-                        const y = (ty + ry) * halfSide + oy;
-                        const z = (tz + rz) * halfSide + oz;
+                        const x = (tx) * 2 * halfSide + ox;
+                        const y = (ty) * 2 * halfSide + oy;
+                        const z = (tz) * 2 * halfSide + oz;
 
                         let index = bag.indexLookup[`${x}.${y}.${z}`];
                         if (index === undefined) {
@@ -105,8 +104,13 @@ export default class OctreeDebugMesh {
             }
         } else {
             for (const cell of root.cells) {
-                cell &&
-                    this.#draw(cell, level + 1, maxLevel, root.position, bag);
+                if(cell) {
+                    const [cpx, cpy, cpz] = cell.position;
+                    const [rpx, rpy, rpz] = offset;
+                    const newOffset = [cpx * halfSide + rpx, cpy * halfSide + rpy, cpz * halfSide + rpz];
+                    cell &&
+                        this.#draw(cell, level + 1, maxLevel, newOffset, bag);
+                }
             }
         }
     }

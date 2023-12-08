@@ -92,7 +92,10 @@ export default class Builder {
 
         this.#scene.add(makeCube({ position: new THREE.Vector3(-100, 71, 0) }));
 
-        const os = new OctreeDebugMesh(octreeSphereNew(), [0, 170, 0], 'octree-sphere');
+        const sphere = new Octree();
+        octreeSphereNew(sphere, 4);
+
+        const os = new OctreeDebugMesh(sphere, [0, 170, 0], 'octree-sphere');
         this.#voxelMeshes.push(
             os
             // makeOctreeSphere({
