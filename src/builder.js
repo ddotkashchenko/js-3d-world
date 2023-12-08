@@ -4,7 +4,9 @@ import Controller from './controller';
 import Controls from './controls';
 import { VoxelMesh } from './voxelMesh';
 import { fromImage } from './heightmap';
-import { makeCube, makeOctreeSphere, makePlane, makeWater } from './scene';
+import { makeCube, makeOctreeSphere, makePlane, makeWater, octreeSphereNew } from './scene';
+import OctreeDebugMesh from './octreeMesh';
+import { Octree } from '../octree';
 
 export default class Builder {
     #threejs;
@@ -90,14 +92,18 @@ export default class Builder {
 
         this.#scene.add(makeCube({ position: new THREE.Vector3(-100, 71, 0) }));
 
+        const os = new OctreeDebugMesh(octreeSphereNew(), [0, 170, 0], 'octree-sphere');
         this.#voxelMeshes.push(
-            makeOctreeSphere({
-                res: 0,
-                name: 'octree-sphere',
-                position: new THREE.Vector3(0, 170, 0),
-                material: {wireframe: false}
-            })
+            os
+            // makeOctreeSphere({
+            //     res: 0,
+            //     name: 'octree-sphere',
+            //     position: new THREE.Vector3(0, 170, 0),
+            //     material: {wireframe: false}
+            // })
         );
+
+        os.draw();
 
         this.#controller = new Controller(this.#scene, {});
         this.#next.push((t) => this.#controller.step(t));
@@ -129,14 +135,14 @@ export default class Builder {
             const sphere = this.#voxelMeshes.find(
                 (vm) => vm.name === 'octree-sphere'
             );
-            sphere.updateTop(++sphereTopLevel);
+            sphere.draw(Math.min(++sphereTopLevel, 6));
         });
 
         this.#controls.bindKey('-', () => {
             const sphere = this.#voxelMeshes.find(
                 (vm) => vm.name === 'octree-sphere'
             );
-            sphere.updateTop(--sphereTopLevel > 0 ? sphereTopLevel : 0);
+            sphere.draw(Math.max(--sphereTopLevel, 0))//(--sphereTopLevel > 0 ? sphereTopLevel : 0);
         });
     }
 

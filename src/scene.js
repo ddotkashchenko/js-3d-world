@@ -6,6 +6,7 @@ import {
     Vector3,
 } from 'three';
 import { VoxelMesh, octreeOrder } from './voxelMesh';
+import { Octree } from '../octree';
 
 function makePlane(options) {
     const { width, height, segments, material, shadow } = {
@@ -86,6 +87,17 @@ function makeWater(width, height, heightLevel, material) {
     mesh.position.setComponent(1, heightLevel);
 
     return mesh;
+}
+
+function octreeSphereNew() {
+    const root = new Octree();
+
+    root.set([1, 1, 1]);
+    root.set([1, -1, 1]);
+    root.set([-1, -1, 1]);
+    root.set([1, -1, -1]);
+
+    return root;
 }
 
 function calcSphere(
@@ -185,4 +197,5 @@ export {
     makeOctreePyramid,
     makeOctreeSphere,
     makeWater,
+    octreeSphereNew
 };
