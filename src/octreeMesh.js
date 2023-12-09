@@ -69,6 +69,10 @@ export default class OctreeDebugMesh {
         this.#mesh.position.set(...position);
         this.#mesh.scale.set(SCALE, SCALE, SCALE);
 
+        Object.defineProperty(this, 'shape', {
+            value: this.#octree
+        });
+        
         Object.defineProperty(this, 'mesh', {
             value: this.#mesh,
         });

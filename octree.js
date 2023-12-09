@@ -39,6 +39,11 @@ export class Octree {
             return null;
         }
 
+        // questionable
+        if(this.#parent.leaf) {
+            return this.#parent;
+        }
+
         const findPosition = this.#position.map((p, i) => p + (2 * relativePosition[i]));
         const index = this.#cellIndexAt(findPosition);
 

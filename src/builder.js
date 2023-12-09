@@ -142,6 +142,23 @@ export default class Builder {
             );
             sphere.draw(Math.max(--sphereTopLevel, 0))
         });
+
+        let radius = 1.666;
+        const radStep = 0.05;
+
+        this.#controls.bindKey('*', () => {
+            const sphere = this.#voxelMeshes.find(vm => vm.name === 'octree-sphere');
+            radius += radStep;
+            octreeSphereNew(sphere.shape, 4, radius);
+            sphere.draw(sphereTopLevel);
+        });
+
+        this.#controls.bindKey('/', () => {
+            const sphere = this.#voxelMeshes.find(vm => vm.name === 'octree-sphere');
+            radius = Math.max(1, radius - radStep)
+            octreeSphereNew(sphere.shape, 4, radius);
+            sphere.draw(sphereTopLevel);
+        });
     }
 
     build() {

@@ -100,7 +100,7 @@ function testOctree() {
     return root;
 }
 
-function octreeSphereNew(root, maxLevel, margin = 0.1, level = 0, [ox, oy, oz] = [0, 0, 0]) {
+function octreeSphereNew(root, maxLevel, radius = 1.666,margin = 0.1, level = 0, [ox, oy, oz] = [0, 0, 0]) {
     if(maxLevel === level) {
         return;
     }
@@ -114,11 +114,11 @@ function octreeSphereNew(root, maxLevel, margin = 0.1, level = 0, [ox, oy, oz] =
             oz + (cz / pow)
         );
         
-        const inside = v.length() <= 1.666 + (1.666 * 0.7) / pow;
+        const inside = v.length() <= radius + (radius * 0.7) / pow;
 
         if(inside) {
             const cell = root.set([cx, cy, cz]);
-            octreeSphereNew(cell, maxLevel, margin, level + 1, [v.x, v.y, v.z]); 
+            octreeSphereNew(cell, maxLevel, radius, margin, level + 1, [v.x, v.y, v.z]); 
         }
     }
 }
