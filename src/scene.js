@@ -89,18 +89,18 @@ function makeWater(width, height, heightLevel, material) {
     return mesh;
 }
 
-function testOctree() {
-    const root = new Octree();
+// function testOctree() {
+//     const root = new Octree();
 
-    root.set([1, 1, 1]);
-    root.set([1, -1, 1]);
-    root.set([-1, -1, 1]);
-    root.set([1, -1, -1]);
+//     root.set([1, 1, 1]);
+//     root.set([1, -1, 1]);
+//     root.set([-1, -1, 1]);
+//     root.set([1, -1, -1]);
 
-    return root;
-}
+//     return root;
+// }
 
-function octreeSphereNew(root, maxLevel, radius = 1.666,margin = 0.1, level = 0, [ox, oy, oz] = [0, 0, 0]) {
+function octreeSphereNew(root, maxLevel, radius = 1.666, level = 0, [ox, oy, oz] = [0, 0, 0]) {
     if(maxLevel === level) {
         return;
     }
@@ -118,7 +118,7 @@ function octreeSphereNew(root, maxLevel, radius = 1.666,margin = 0.1, level = 0,
 
         if(inside) {
             const cell = root.set([cx, cy, cz]);
-            octreeSphereNew(cell, maxLevel, radius, margin, level + 1, [v.x, v.y, v.z]); 
+            octreeSphereNew(cell, maxLevel, radius, level + 1, [v.x, v.y, v.z]); 
         }
     }
 }

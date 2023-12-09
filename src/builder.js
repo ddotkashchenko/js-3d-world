@@ -159,6 +159,17 @@ export default class Builder {
             octreeSphereNew(sphere.shape, 4, radius);
             sphere.draw(sphereTopLevel);
         });
+
+        this.#controls.bindKey('8', () => {
+            const sphere = this.#voxelMeshes.find(vm => vm.name === 'octree-sphere');
+            const top = sphere.shape.cells.filter(c => c.position[1] === 1);
+
+            for(const topCell of top) {
+                octreeSphereNew(topCell, sphereTopLevel + 2, radius, 1, topCell.position.map(c => c / 2));
+            }
+
+            sphere.draw(sphereTopLevel + 1)
+        });
     }
 
     build() {
