@@ -4,8 +4,6 @@ import {
     Mesh,
     MeshStandardMaterial,
 } from 'three';
-import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
-import { Octree } from '../octree';
 
 const SCALE = 50;
 
@@ -87,7 +85,6 @@ export default class OctreeDebugMesh {
 
             for (const { normal, vertices } of box) {
                 if(!root.find(normal)) {
-                // if (root.isBoundary(normal)) {
                     for (const [tx, ty, tz] of vertices) {
                         const x = (tx) * 2 * halfSide + ox;
                         const y = (ty) * 2 * halfSide + oy;

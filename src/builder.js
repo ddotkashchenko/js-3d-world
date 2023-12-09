@@ -98,12 +98,6 @@ export default class Builder {
         const os = new OctreeDebugMesh(sphere, [0, 170, 0], 'octree-sphere');
         this.#voxelMeshes.push(
             os
-            // makeOctreeSphere({
-            //     res: 0,
-            //     name: 'octree-sphere',
-            //     position: new THREE.Vector3(0, 170, 0),
-            //     material: {wireframe: false}
-            // })
         );
 
         os.draw();
@@ -146,7 +140,7 @@ export default class Builder {
             const sphere = this.#voxelMeshes.find(
                 (vm) => vm.name === 'octree-sphere'
             );
-            sphere.draw(Math.max(--sphereTopLevel, 0))//(--sphereTopLevel > 0 ? sphereTopLevel : 0);
+            sphere.draw(Math.max(--sphereTopLevel, 0))
         });
     }
 

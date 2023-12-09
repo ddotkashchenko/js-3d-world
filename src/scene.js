@@ -106,7 +106,6 @@ function octreeSphereNew(root, maxLevel, margin = 0.1, level = 0, [ox, oy, oz] =
     }
 
     const pow = Math.pow(2, level);
-    // const marginLeveled = margin / pow;
 
     for(const [cx, cy, cz] of octreeOrder) {
         const v = new Vector3(
@@ -115,16 +114,10 @@ function octreeSphereNew(root, maxLevel, margin = 0.1, level = 0, [ox, oy, oz] =
             oz + (cz / pow)
         );
         
-        const inside = v.length() <= 1.666 + (1.666 * 0.7) / pow; //(v.length() + marginLeveled) < 2;
+        const inside = v.length() <= 1.666 + (1.666 * 0.7) / pow;
 
         if(inside) {
             const cell = root.set([cx, cy, cz]);
-            // const offset = [
-            //     cell.position[0] / pow + ox,
-            //     cell.position[1] / pow + ox,
-            //     cell.position[2] / pow + ox
-            // ];
-
             octreeSphereNew(cell, maxLevel, margin, level + 1, [v.x, v.y, v.z]); 
         }
     }
