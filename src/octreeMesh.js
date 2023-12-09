@@ -65,7 +65,6 @@ export default class OctreeDebugMesh {
             new MeshStandardMaterial({
                 color: 0xff99ff,
                 flatShading: true,
-                wireframe: false,
             })
         );
         this.#mesh.name = name;
@@ -87,7 +86,8 @@ export default class OctreeDebugMesh {
             const [ox, oy, oz] = offset;
 
             for (const { normal, vertices } of box) {
-                if (root.isBoundary(normal)) {
+                if(!root.find(normal)) {
+                // if (root.isBoundary(normal)) {
                     for (const [tx, ty, tz] of vertices) {
                         const x = (tx) * 2 * halfSide + ox;
                         const y = (ty) * 2 * halfSide + oy;
@@ -116,6 +116,7 @@ export default class OctreeDebugMesh {
     }
 
     draw(level = 0) {
+        console.log('building ', level);
         const bag = { vertices: [], indices: [], indexLookup: {} };
         this.#draw(this.#octree, 0, level, [0, 0, 0], bag);
 

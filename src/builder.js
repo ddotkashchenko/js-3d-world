@@ -135,6 +135,7 @@ export default class Builder {
         let sphereTopLevel = 0;
 
         this.#controls.bindKey('+', () => {
+            sphereTopLevel = Math.max(0, sphereTopLevel);
             const sphere = this.#voxelMeshes.find(
                 (vm) => vm.name === 'octree-sphere'
             );

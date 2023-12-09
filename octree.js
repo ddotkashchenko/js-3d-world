@@ -21,32 +21,44 @@ export class Octree {
         Object.defineProperty(this, 'position', {
             value: this.#position
         });
+
+        Object.defineProperty(this, 'parent', {
+            value: this.#parent
+        });
     }
 
-    isBoundary([nx, ny, nz]) {
-        if(!this.#parent) {
-            return true;
-        }
-
-        const [px, py, pz] = this.#position;
-        const x = nx ? (px + nx) || -px : px;
-        const y = ny ? (py + ny) || -py : py;
-        const z = nz ? (pz + nz) || -pz : pz;
-
-        const index = octreeOrder.findIndex(([ox, oy, oz]) => 
+    #cellIndexAt([x, y, z]) {
+        return octreeOrder.findIndex(([ox, oy, oz]) => 
             x === ox && 
             y === oy && 
             z === oz);
+    }
 
-        return !this.#parent.cells[index];
+    find(relativePosition) {
+        if(!this.#parent) {
+            return null;
+        }
+
+        const findPosition = this.#position.map((p, i) => p + (2 * relativePosition[i]));
+        const index = this.#cellIndexAt(findPosition);
+
+        if(index === -1) {
+            const adjacentParent = this.#parent.find(relativePosition);
+            if(!adjacentParent) {
+                return null;
+            }
+
+            const flipPosition = findPosition.map((c) => c === -3 ? 1 : c === 3 ? -1 : c);
+            const flipIndex = this.#cellIndexAt(flipPosition);
+            return adjacentParent.cells[flipIndex];
+        }
+
+        return this.#parent.cells[index];
     }
 
     set([x, y, z]) {
         this.#leaf = false;
-        const index = octreeOrder.findIndex(([ox, oy, oz]) => 
-            x === ox && 
-            y === oy && 
-            z === oz);
+        const index = this.#cellIndexAt([x, y, z]);
         const cell = new Octree([x, y, z], this);
         this.#cells[index] = cell;
 
