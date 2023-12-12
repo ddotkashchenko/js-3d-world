@@ -2,6 +2,7 @@ import {
     BufferAttribute,
     BufferGeometry,
     Mesh,
+    MeshPhongMaterial,
     MeshStandardMaterial,
 } from 'three';
 
@@ -65,6 +66,10 @@ export default class OctreeDebugMesh {
                 flatShading: true,
             })
         );
+
+        this.#mesh.castShadow = true;
+        this.#mesh.receiveShadow = true;
+
         this.#mesh.name = name;
         this.#mesh.position.set(...position);
         this.#mesh.scale.set(SCALE, SCALE, SCALE);
@@ -127,9 +132,10 @@ export default class OctreeDebugMesh {
         );
 
         this.#mesh.geometry.setIndex(bag.indices);
-
+        
+        this.#mesh.geometry.computeVertexNormals();
         this.#mesh.geometry.computeBoundingBox();
         this.#mesh.geometry.computeBoundingSphere();
-        this.#mesh.geometry.computeVertexNormals();
+        this.#mesh.material.needsUpdate = true;
     }
 }

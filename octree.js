@@ -15,7 +15,8 @@ export class Octree {
         });
 
         Object.defineProperty(this, 'leaf', {
-            get: () => this.#leaf
+            get: () => this.#leaf,
+            set: (v) => this.#leaf = v
         });
 
         Object.defineProperty(this, 'position', {

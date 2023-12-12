@@ -89,16 +89,13 @@ export default class Builder {
         makeTerrain(1280, 12, heightmap, new THREE.Vector3());
 
         this.#scene.add(makeWater(heightmap.width, heightmap.height, 4.5));
-
         this.#scene.add(makeCube({ position: new THREE.Vector3(-100, 71, 0) }));
 
         const sphere = new Octree();
         octreeSphereNew(sphere, 4);
 
         const os = new OctreeDebugMesh(sphere, [0, 170, 0], 'octree-sphere');
-        this.#voxelMeshes.push(
-            os
-        );
+        this.#voxelMeshes.push(os);
 
         os.draw();
 
@@ -149,26 +146,25 @@ export default class Builder {
         this.#controls.bindKey('*', () => {
             const sphere = this.#voxelMeshes.find(vm => vm.name === 'octree-sphere');
             radius += radStep;
-            octreeSphereNew(sphere.shape, 4, radius);
+            octreeSphereNew(sphere.shape, sphereTopLevel, radius);
             sphere.draw(sphereTopLevel);
         });
 
         this.#controls.bindKey('/', () => {
             const sphere = this.#voxelMeshes.find(vm => vm.name === 'octree-sphere');
             radius = Math.max(1, radius - radStep)
-            octreeSphereNew(sphere.shape, 4, radius);
+            octreeSphereNew(sphere.shape, sphereTopLevel, radius);
             sphere.draw(sphereTopLevel);
         });
 
         this.#controls.bindKey('8', () => {
             const sphere = this.#voxelMeshes.find(vm => vm.name === 'octree-sphere');
-            const top = sphere.shape.cells.filter(c => c.position[1] === 1);
+            const top = sphere.shape.cells.filter(c => c.position[1] === -1);
 
-            for(const topCell of top) {
-                octreeSphereNew(topCell, sphereTopLevel + 2, radius, 1, topCell.position.map(c => c / 2));
+            for(const cell of top) {
+                octreeSphereNew(cell, sphereTopLevel + 1, radius, 1, cell.position.map(c => c / 2));
             }
-
-            sphere.draw(sphereTopLevel + 1)
+            sphere.draw(++sphereTopLevel);
         });
     }
 
