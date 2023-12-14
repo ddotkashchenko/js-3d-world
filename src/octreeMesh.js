@@ -93,7 +93,7 @@ export default class OctreeDebugMesh {
             const [ox, oy, oz] = offset;
 
             for (const { normal, vertices } of box) {
-                if(!root.find(normal)) {
+                if(!root.traverse(normal)) {
                     for (const [tx, ty, tz] of vertices) {
                         const x = (tx) * 2 * halfSide + ox;
                         const y = (ty) * 2 * halfSide + oy;

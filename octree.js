@@ -35,27 +35,28 @@ export class Octree {
             z === oz);
     }
 
-    find(relativePosition) {
+    traverse(relativePosition) {
         if(!this.#parent) {
             return null;
-        }
-
-        // questionable
-        if(this.#parent.leaf) {
-            return this.#parent;
         }
 
         const findPosition = this.#position.map((p, i) => p + (2 * relativePosition[i]));
         const index = this.#cellIndexAt(findPosition);
 
         if(index === -1) {
-            const adjacentParent = this.#parent.find(relativePosition);
+            const adjacentParent = this.#parent.traverse(relativePosition);
+
             if(!adjacentParent) {
                 return null;
             }
 
+            if(adjacentParent.leaf) {
+                return adjacentParent;
+            }
+
             const flipPosition = findPosition.map((c) => c === -3 ? 1 : c === 3 ? -1 : c);
             const flipIndex = this.#cellIndexAt(flipPosition);
+
             return adjacentParent.cells[flipIndex];
         }
 
