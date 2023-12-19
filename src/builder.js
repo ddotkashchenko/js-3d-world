@@ -5,7 +5,7 @@ import Controls from './controls';
 import { VoxelMesh } from './voxelMesh';
 import { fromImage } from './heightmap';
 import { makeCube, makeOctreeSphere, makePlane, makeWater, octreeSphereNew } from './scene';
-import OctreeDebugMesh from './octreeMesh';
+import OctreeMesh from './octreeMesh';
 import { Octree } from '../octree';
 
 export default class Builder {
@@ -73,31 +73,37 @@ export default class Builder {
 
         const makeTerrain = (width, heightY, heightmap, position) => {
             const size = width / (heightmap.width / (heightmap.pixelSize / 2));
-            const terrain = new VoxelMesh({
-                size,
-                name: 'voxelTerrain',
-                position,
-                material: { color: 0xbce791, wireframe: false },
-            });
+            // const terrain = new VoxelMesh({
+            //     size,
+            //     name: 'voxelTerrain',
+            //     position,
+            //     material: { color: 0xbce791, wireframe: false },
+            // });
 
-            const cells = heightmap.voxelize2(heightY);
-            terrain.construct(cells);
+            // const cells = heightmap.voxelize2(heightY);
+            // terrain.construct(cells);
+
+            const o = heightmap.octree(heightY);
+            const terrain = new OctreeMesh(o, position, 'terrain', {color: 0xbce791});
+
             this.#voxelMeshes.push(terrain);
+
+            terrain.draw();
         };
 
         const heightmap = icelandBitmap.load(16);
         makeTerrain(1280, 12, heightmap, new THREE.Vector3());
 
-        this.#scene.add(makeWater(heightmap.width, heightmap.height, 4.5));
+        this.#scene.add(makeWater(heightmap.width, heightmap.height, 4.5, {transparent: true, opacity: 0.8}));
         this.#scene.add(makeCube({ position: new THREE.Vector3(-100, 71, 0) }));
 
         const sphere = new Octree();
         octreeSphereNew(sphere, 4);
 
-        const os = new OctreeDebugMesh(sphere, [0, 170, 0], 'octree-sphere');
+        const os = new OctreeMesh(sphere, [0, 170, 0], 'octree-sphere');
         this.#voxelMeshes.push(os);
 
-        os.draw();
+        os.draw(6);
 
         this.#controller = new Controller(this.#scene, {});
         this.#next.push((t) => this.#controller.step(t));
@@ -128,14 +134,14 @@ export default class Builder {
         this.#controls.bindKey('+', () => {
             sphereTopLevel = Math.max(0, sphereTopLevel);
             const sphere = this.#voxelMeshes.find(
-                (vm) => vm.name === 'octree-sphere'
+                (vm) => vm.name === 'terrain'
             );
             sphere.draw(Math.min(++sphereTopLevel, 6));
         });
 
         this.#controls.bindKey('-', () => {
             const sphere = this.#voxelMeshes.find(
-                (vm) => vm.name === 'octree-sphere'
+                (vm) => vm.name === 'terrain'
             );
             sphere.draw(Math.max(--sphereTopLevel, 0))
         });
@@ -164,6 +170,7 @@ export default class Builder {
             for(const cell of top) {
                 octreeSphereNew(cell, sphereTopLevel + 1, radius, 1, cell.position.map(c => c / 2));
             }
+
             sphere.draw(++sphereTopLevel);
         });
     }

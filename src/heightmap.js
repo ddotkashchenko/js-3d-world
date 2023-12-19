@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Math2 } from './math2';
+import { Octree, octreeOrder } from '../octree';
 
 class Heightmap {
     #bitmap;
@@ -49,6 +50,51 @@ class Heightmap {
             pixelSize,
 
             downresBitmapAsync: () => createImageBitmap(imageData, {imageOrientation: 'flipY'}),
+
+            octree: (maxY) => {
+                const root = new Octree();
+                const depth = Math.ceil(Math.log2(this.width / pixelSize));
+
+                function build(parent, [px, py, pz], halfside, [ox, oy, oz] = [0, 0, 0], level = 0) {
+                    let [dx, dy, dz] = [
+                        Math.sign(px - ox), 
+                        Math.sign(py - oy), 
+                        Math.sign(pz - oz)];
+
+                    const next = parent.set([dx, dy, dz])
+                    
+                    if(level < depth) {
+                        const s = halfside / 2;
+                        const newOffset = [
+                            ox + dx * s,
+                            oy + dy * s,
+                            oz + dz * s
+                        ];
+                        build(next, [px, py, pz], s, newOffset, level + 1);
+                    }   
+                }
+
+                const cellsHalfWidth = Math.ceil((this.width / pixelSize) / 2);
+                const aspectRatio = this.width / this.height;
+                const cellsHalfHeight = Math.ceil(cellsHalfWidth / aspectRatio);
+        
+                let cellX = -cellsHalfWidth;
+                let cellZ = -cellsHalfHeight;
+
+                for (let x = pixelSize / 2; x < this.width; x += pixelSize) {
+                    for (let z = pixelSize / 2; z < this.height; z += pixelSize) {
+                        const height = pixelAt(x, z);
+                        const cellY = Math.ceil(maxY * height) || 1;
+                        console.log('add: ', [cellX, cellY, cellZ]);
+                        build(root, [cellX, cellY, cellZ], cellsHalfWidth);
+                        cellZ++;
+                    }
+                    cellX++;
+                    cellZ = -cellsHalfHeight;
+                }
+
+                return root;
+            },
 
             voxelize2: (maxY) => {
                 let cells = {};//[];

@@ -16,6 +16,7 @@ export default class Controller {
 
     step(t) {
         this.makeObjectSpin('cube', -0.01);
+        this.makeObjectSpin('octree-sphere', -0.01);
     }
 
     async move(obj, vec) {

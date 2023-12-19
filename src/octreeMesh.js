@@ -53,17 +53,18 @@ const back = {
 
 const box = [front, back, top, bottom, left, right];
 
-export default class OctreeDebugMesh {
+export default class OctreeMesh {
     #octree;
     #mesh;
 
-    constructor(octree, position, name) {
+    constructor(octree, position, name, material) {
         this.#octree = octree;
         this.#mesh = new Mesh(
             new BufferGeometry(),
             new MeshStandardMaterial({
                 color: 0xff99ff,
                 flatShading: true,
+                ...material
             })
         );
 

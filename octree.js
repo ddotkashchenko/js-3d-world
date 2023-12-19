@@ -20,12 +20,34 @@ export class Octree {
         });
 
         Object.defineProperty(this, 'position', {
-            value: this.#position
+            get: () => this.#position
         });
 
         Object.defineProperty(this, 'parent', {
             value: this.#parent
         });
+    }
+
+    getAbsolutePosition() {
+        const parents = [];
+        let parent = this.parent;
+
+        while(parent) {
+            parents.push(parent);
+            parent = parent.parent;
+        }
+
+        let level = 0;
+        let [x, y, z] = [0, 0, 0];
+        for(let i = parents.length - 1; i >= 0; i--) {
+            const size = Math.pow(2, level);
+            x += parents[i].position[0] / size;
+            y += parents[i].position[1] / size;
+            z += parents[i].position[2] / size;
+            level++
+        }
+
+        return [x, y, z];
     }
 
     #cellIndexAt([x, y, z]) {
@@ -63,11 +85,24 @@ export class Octree {
         return this.#parent.cells[index];
     }
 
+    // set([x, y, z]) {
+    //     this.#leaf = false;
+    //     const index = this.#cellIndexAt([x, y, z]);
+    //     const cell = new Octree([x, y, z], this);
+    //     this.#cells[index] = cell;
+
+    //     return cell;
+    // }
+
     set([x, y, z]) {
-        this.#leaf = false;
         const index = this.#cellIndexAt([x, y, z]);
-        const cell = new Octree([x, y, z], this);
-        this.#cells[index] = cell;
+        let cell = this.#cells[index];
+
+        if(!cell) {
+            this.#leaf = false;
+            cell = new Octree([x, y, z], this);
+            this.#cells[index] = cell;
+        }
 
         return cell;
     }
