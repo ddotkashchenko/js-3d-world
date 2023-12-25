@@ -85,15 +85,6 @@ export class Octree {
         return this.#parent.cells[index];
     }
 
-    // set([x, y, z]) {
-    //     this.#leaf = false;
-    //     const index = this.#cellIndexAt([x, y, z]);
-    //     const cell = new Octree([x, y, z], this);
-    //     this.#cells[index] = cell;
-
-    //     return cell;
-    // }
-
     set([x, y, z]) {
         const index = this.#cellIndexAt([x, y, z]);
         let cell = this.#cells[index];

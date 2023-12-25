@@ -2,9 +2,8 @@ import * as THREE from 'three';
 import World from './world';
 import Controller from './controller';
 import Controls from './controls';
-import { VoxelMesh } from './voxelMesh';
 import { fromImage } from './heightmap';
-import { makeCube, makeOctreeSphere, makePlane, makeWater, octreeSphereNew } from './scene';
+import { makeCube, makeWater, octreeSphereNew } from './scene';
 import OctreeMesh from './octreeMesh';
 import { Octree } from '../octree';
 
@@ -73,15 +72,6 @@ export default class Builder {
 
         const makeTerrain = (width, heightY, heightmap, position) => {
             const size = width / (heightmap.width / (heightmap.pixelSize / 2));
-            // const terrain = new VoxelMesh({
-            //     size,
-            //     name: 'voxelTerrain',
-            //     position,
-            //     material: { color: 0xbce791, wireframe: false },
-            // });
-
-            // const cells = heightmap.voxelize2(heightY);
-            // terrain.construct(cells);
 
             const o = heightmap.octree(heightY);
             const terrain = new OctreeMesh(o, position, 'terrain', {color: 0xbce791});
@@ -93,17 +83,6 @@ export default class Builder {
 
         const heightmap = icelandBitmap.load(16);
         makeTerrain(1280, 12, heightmap, new THREE.Vector3());
-
-        this.#scene.add(makeWater(heightmap.width, heightmap.height, 4.5, {transparent: true, opacity: 0.8}));
-        this.#scene.add(makeCube({ position: new THREE.Vector3(-100, 71, 0) }));
-
-        const sphere = new Octree();
-        octreeSphereNew(sphere, 4);
-
-        const os = new OctreeMesh(sphere, [0, 170, 0], 'octree-sphere');
-        this.#voxelMeshes.push(os);
-
-        os.draw(6);
 
         this.#controller = new Controller(this.#scene, {});
         this.#next.push((t) => this.#controller.step(t));

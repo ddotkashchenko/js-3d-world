@@ -95,55 +95,8 @@ class Heightmap {
 
                 return root;
             },
-
-            voxelize2: (maxY) => {
-                let cells = {};//[];
-                const aspectRatio = this.width / this.height;
-                const cellSize = pixelSize;
-                
-                const cellsHalfWidth = Math.floor((this.width / pixelSize) / 2);
-                const cellsHalfHeight = Math.floor(cellsHalfWidth / aspectRatio);
-        
-                let cellX = -cellsHalfWidth;
-                let cellZ = -cellsHalfHeight;
-        
-                for (let x = pixelSize / 2; x < this.width; x += cellSize) {
-                    for (let z = pixelSize / 2; z < this.height; z += cellSize) {
-                        const height = pixelAt(x, z);
-                        const cellY = Math.ceil(maxY * height) || 1;
-        
-                        for (let cy = 0; cy < cellY; cy++) {
-                            cells[`${cellX}.${cy}.${cellZ}`] = [cellX, cy, cellZ];
-                        }
-                        cellZ++;
-                    }
-                    cellX++;
-                    cellZ = -cellsHalfHeight;
-                }
-        
-                return cells;
-            },
-        
         }
     }
-
-    // updatePlane(geometry, size, options) {
-    //     const positionAttribute = geometry.getAttribute('position');
-
-    //     const vertex = new THREE.Vector3();
-    //     for (let i = 0; i < positionAttribute.count; i++) {
-    //         vertex.fromBufferAttribute(positionAttribute, i);
-
-    //         const xf = (vertex.x + size * 0.5) / size;
-    //         const yf = (vertex.y + size * 0.5) / size;
-    //         const height = this._get(xf, yf) || 0;
-
-    //         positionAttribute.setZ(i, height * options.strenth);
-    //     }
-
-    //     positionAttribute.needsUpdate = true;
-    //     geometry.computeVertexNormals();
-    // }
 }
 
 const fromImage = async ({ imgUrl, options }) => {
